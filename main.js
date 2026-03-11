@@ -4,9 +4,9 @@ const { createClient } = supabase;
 
 // ==================== 配置区（修改这里）====================
 // 把您 Supabase 项目的信息填在这里：
-const SUPABASE_URL = 'https://您的项目ID.supabase.co';  // ← 修改
-const SUPABASE_KEY = '您的Anon Key';                      // ← 修改
-const ADMIN_URL = 'https://您的管理员后台地址.vercel.app'; // ← 部署管理员后台后修改
+const SUPABASE_URL = 'https://dlwypgzfoldhzajbnaxv.supabase.co';  // ← 修改
+const SUPABASE_KEY = 'sb_publishable_jU_gprs9slrLe2o-GS1T-g_4kNreKy3';                      // ← 修改
+const ADMIN_URL = 'https://auto-team-hub.vercel.app'; // ← 部署管理员后台后修改
 
 // 创建 Supabase 客户端
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_KEY);
