@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard</title>
+</head>
+
+<body>
+
+<h1>Admin Dashboard</h1>
+
+<div id="userInfo"></div>
+
+<script type="module">
+
+import { supabase } from "../shared/js/supabase.js"
+
+async function init() {
+
+  const { data } = await supabase.auth.getUser()
+
+  if (!data.user) {
+    window.location.href = "../auth/login.html"
+    return
+  }
+
+  document.getElementById("userInfo").innerText =
+    "当前登录用户: " + data.user.email
+}
+
+init()
+
+</script>
+
+</body>
+</html>
