@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>QT Test Hub Login</title>
+</head>
+
+<body>
+
+<h2>登录系统</h2>
+
+<input id="email" placeholder="Email">
+<br><br>
+
+<input id="password" type="password" placeholder="Password">
+<br><br>
+
+<button onclick="login()">登录</button>
+
+<script type="module">
+
+import { supabase, getUserRole } from "../shared/js/supabase.js"
+
+async function login() {
+
+  const email = document.getElementById("email").value
+  const password = document.getElementById("password").value
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  })
+
+  if (error) {
+    alert("登录失败")
+    return
+  }
+
+  const role = await getUserRole()
+
+  if (role === "admin") {
+    window.location.href = "../admin/index.html"
+  } else {
+    window.location.href = "../user/index.html"
+  }
+}
+
+</script>
+
+</body>
+</html>
