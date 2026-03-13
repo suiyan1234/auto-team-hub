@@ -1,0 +1,55 @@
+{
+  "version": 2,
+  "name": "auto-team-hub",
+  "builds": [
+    {
+      "src": "src/**/*.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/auth/(.*)",
+      "dest": "/src/auth/$1"
+    },
+    {
+      "src": "/user/(.*)",
+      "dest": "/src/user/$1"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "/src/admin/$1"
+    },
+    {
+      "src": "/shared/(.*)",
+      "dest": "/src/shared/$1"
+    },
+    {
+      "src": "/config/(.*)",
+      "dest": "/src/config/$1"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/src/assets/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/src/auth/login.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ]
+}
