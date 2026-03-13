@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Team Hub - 物料管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="../shared/css/main.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .barcode-scanner {
+            background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.1) 50%, transparent 100%);
+            animation: scan 2s linear infinite;
+        }
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div class="flex h-screen overflow-hidden">
+        <aside id="sidebar" class="w-64 gradient-bg text-white flex flex-col shadow-2xl"></aside>
+
+        <main class="flex-1 overflow-auto">
+            <header id="header" class="glass-effect sticky top-0 z-40 px-8 py-4 shadow-sm flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">物料管理</h2>
+                <div class="flex items-center gap-4">
+                    <button onclick="adminApp.refreshData()" class="p-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-sync-alt text-gray-600"></i>
+                    </button>
+                    <div class="flex items-center gap-3 pl-4 border-l">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 text-white flex items-center justify-center text-sm font-bold">A</div>
+                        <span class="text-sm font-medium">管理员</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="p-8 space-y-6">
+                <!-- Inventory Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-xl p-6 shadow-sm card-hover border-l-4 border-blue-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                                                <p class="text-sm text-gray-500 mb-1">总物料种类</p>
+                                <h3 class="text-2xl font-bold text-gray-800" id="inv-total-types">0</h3>
+                            </div>
+                            <div class="p-3 bg-blue-100 rounded-lg">
+                                <i class="fas fa-boxes text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm card-hover border-l-4 border-green-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">库存充足</p>
+                                <h3 class="text-2xl font-bold text-gray-800" id="inv-normal">0</h3>
+                            </div>
+                            <div class="p-3 bg-green-100 rounded-lg">
+                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm card-hover border-l-4 border-yellow-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">库存不足</p>
+                                <h3 class="text-2xl font-bold text-gray-800" id="inv-low">0</h3>
+                            </div>
+                            <div class="p-3 bg-yellow-100 rounded-lg">
+                                <i class="fas fa-exclamation-circle text-yellow-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm card-hover border-l-4 border-red-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">缺货预警</p>
+                                <h3 class="text-2xl font-bold text-gray-800" id="inv-out">0</h3>
+                            </div>
+                            <div class="p-3 bg-red-100 rounded-lg">
+                                <i class="fas fa-times-circle text-red-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scanner Section -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="flex-1 relative">
+                            <i class="fas fa-barcode absolute left-3 top-3 text-gray-400"></i>
+                            <input type="text" id="barcode-input" placeholder="扫描或输入物料条码..." 
+                                class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                onkeypress="if(event.key==='Enter')adminApp.scanBarcode()">
+                        </div>
+                        <button onclick="adminApp.scanBarcode()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-search mr-1"></i>查询
+                        </button>
+                        <button onclick="adminApp.openStockModal('in')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                            <i class="fas fa-sign-in-alt mr-1"></i>入库
+                        </button>
+                        <button onclick="adminApp.openStockModal('out')" class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+                            <i class="fas fa-sign-out-alt mr-1"></i>出库
+                        </button>
+                    </div>
+                    <div id="scan-result" class="hidden bg-gray-50 rounded-lg p-4">
+                        <!-- Scan result display -->
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="flex justify-between items-center">
+                    <div class="flex gap-4">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            <input type="text" id="inventory-search" placeholder="搜索物料名称、编号..." 
+                                class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+                                oninput="adminApp.filterInventory()">
+                        </div>
+                        <select id="inv-category-filter" class="px-4 py-2 border rounded-lg" onchange="adminApp.filterInventory()">
+                            <option value="">全部分类</option>
+                            <option value="electronics">电子元器件</option>
+                            <option value="mechanical">机械零件</option>
+                            <option value="consumables">耗材</option>
+                            <option value="tools">工具</option>
+                            <option value="others">其他</option>
+                        </select>
+                        <select id="inv-status-filter" class="px-4 py-2 border rounded-lg" onchange="adminApp.filterInventory()">
+                            <option value="">全部状态</option>
+                            <option value="normal">库存正常</option>
+                            <option value="low">库存不足</option>
+                            <option value="out">缺货</option>
+                        </select>
+                    </div>
+                    <button onclick="adminApp.openInventoryModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                        <i class="fas fa-plus"></i> 新增物料
+                    </button>
+                </div>
+
+                <!-- Inventory Grid -->
+                <div id="inventory-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Dynamic inventory cards -->
+                </div>
+
+                <!-- Inventory Table -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-gray-800">物料清单</h3>
+                        <span class="text-sm text-gray-500" id="inventory-count">共 0 种物料</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">物料编号</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">名称</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">分类</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">规格</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">当前库存</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">安全库存</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">状态</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-table" class="divide-y divide-gray-200">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Transaction History -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-gray-800">出入库记录</h3>
+                        <div class="flex gap-2">
+                            <select id="trans-type-filter" class="px-3 py-1 border rounded-lg text-sm" onchange="adminApp.loadTransactions()">
+                                <option value="">全部类型</option>
+                                <option value="in">入库</option>
+                                <option value="out">出库</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">时间</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">物料</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">类型</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">数量</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">操作人</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">备注</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transaction-table" class="divide-y divide-gray-200">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Inventory Modal -->
+    <div id="inventory-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center hidden">
+        <div class="bg-white rounded-xl w-full max-w-lg mx-4">
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-lg font-bold" id="inventory-modal-title">新增物料</h3>
+                <button onclick="adminApp.closeInventoryModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="inventory-form" class="p-6 space-y-4">
+                <input type="hidden" id="inventory-id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">物料编号 *</label>
+                    <input type="text" id="inv-no" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">物料名称 *</label>
+                    <input type="text" id="inv-name" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">分类</label>
+                        <select id="inv-category" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="electronics">电子元器件</option>
+                            <option value="mechanical">机械零件</option>
+                            <option value="consumables">耗材</option>
+                            <option value="tools">工具</option>
+                            <option value="others">其他</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">规格型号</label>
+                        <input type="text" id="inv-spec" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">当前库存</label>
+                        <input type="number" id="inv-quantity" min="0" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">安全库存</label>
+                        <input type="number" id="inv-safety" min="0" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">存放位置</label>
+                    <input type="text" id="inv-location" placeholder="如：A仓库-3层-5号位" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                    <textarea id="inv-note" rows="2" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="adminApp.closeInventoryModal()" class="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50">取消</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Stock In/Out Modal -->
+    <div id="stock-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center hidden">
+        <div class="bg-white rounded-xl w-full max-w-md mx-4">
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-lg font-bold" id="stock-modal-title">入库操作</h3>
+                <button onclick="adminApp.closeStockModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="stock-form" class="p-6 space-y-4">
+                <input type="hidden" id="stock-type">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">物料 *</label>
+                    <select id="stock-item" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <!-- Dynamic options -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">数量 *</label>
+                    <input type="number" id="stock-quantity" required min="1" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">操作人</label>
+                    <input type="text" id="stock-operator" readonly class="w-full px-3 py-2 bg-gray-100 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                    <textarea id="stock-note" rows="2" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="adminApp.closeStockModal()" class="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50">取消</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">确认</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../shared/js/supabase.js"></script>
+    <script src="../shared/js/utils.js"></script>
+    <script src="../shared/components/sidebar.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.adminApp = new AdminApp('inventory');
+        });
+    </script>
+</body>
+</html>
