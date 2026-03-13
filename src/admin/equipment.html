@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Team Hub - 设备管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="../shared/css/main.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div class="flex h-screen overflow-hidden">
+        <aside id="sidebar" class="w-64 gradient-bg text-white flex flex-col shadow-2xl"></aside>
+
+        <main class="flex-1 overflow-auto">
+            <header id="header" class="glass-effect sticky top-0 z-40 px-8 py-4 shadow-sm flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">设备管理</h2>
+                <div class="flex items-center gap-4">
+                    <button onclick="adminApp.refreshData()" class="p-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-sync-alt text-gray-600"></i>
+                    </button>
+                    <div class="flex items-center gap-3 pl-4 border-l">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 text-white flex items-center justify-center text-sm font-bold">A</div>
+                        <span class="text-sm font-medium">管理员</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="p-8 space-y-6">
+                <!-- Equipment Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-xl p-6 shadow-sm card-hover border-l-4 border-green-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">运行中</p>
+                                <h3 class="text-2xl font-bold text-gray-800" id="eq-running">0</h3>
+                            </div>
+                            <div class="p-3 bg-green-100 rounded-lg">
+                                <i class="fas fa-play-circle text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm card-hover border-l-4 border-yellow-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">待机中</p>
+                                <h3 class="text-2xl font-bold text-gray-800" id="eq-idle">0</h3>
+                            </div>
+                            <div class="p-3 bg-yellow-100 rounded-lg">
+                                <i class="fas fa-pause-circle text-yellow-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm card-hover border-l-4 border-red-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">故障中</p>
+                                <h3 class="text-2xl font-bold text-gray-800" id="eq-error">0</h3>
+                            </div>
+                            <div class="p-3 bg-red-100 rounded-lg">
+                                <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm card-hover border-l-4 border-blue-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">平均稼动率</p>
+                                <h3 class="text-2xl font-bold text-gray-800" id="eq-utilization">0%</h3>
+                            </div>
+                            <div class="p-3 bg-blue-100 rounded-lg">
+                                <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Utilization Chart -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">设备稼动率趋势</h3>
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="equipmentChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="flex justify-between items-center">
+                    <div class="flex gap-4">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            <input type="text" id="equipment-search" placeholder="搜索设备名称、编号..." 
+                                class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+                                oninput="adminApp.filterEquipment()">
+                        </div>
+                        <select id="equipment-status-filter" class="px-4 py-2 border rounded-lg" onchange="adminApp.filterEquipment()">
+                            <option value="">全部状态</option>
+                            <option value="running">运行中</option>
+                            <option value="idle">待机中</option>
+                            <option value="maintenance">维护中</option>
+                            <option value="error">故障中</option>
+                        </select>
+                    </div>
+                    <button onclick="adminApp.openEquipmentModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                        <i class="fas fa-plus"></i> 登记设备
+                    </button>
+                </div>
+
+                <!-- Equipment Grid -->
+                <div id="equipment-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Dynamic equipment cards -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Equipment Modal -->
+    <div id="equipment-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center hidden">
+        <div class="bg-white rounded-xl w-full max-w-lg mx-4">
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-lg font-bold" id="equipment-modal-title">登记设备</h3>
+                <button onclick="adminApp.closeEquipmentModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="equipment-form" class="p-6 space-y-4">
+                <input type="hidden" id="equipment-id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">设备编号 *</label>
+                    <input type="text" id="eq-no" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">设备名称 *</label>
+                    <input type="text" id="eq-name" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">设备类型</label>
+                        <select id="eq-type" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="tester">测试机台</option>
+                            <option value="robot">机械臂</option>
+                            <option value="computer">工作站</option>
+                            <option value="instrument">仪器仪表</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">状态</label>
+                        <select id="eq-status" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="idle">待机中</option>
+                            <option value="running">运行中</option>
+                            <option value="maintenance">维护中</option>
+                            <option value="error">故障中</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">位置</label>
+                    <input type="text" id="eq-location" placeholder="如：A区-3号楼-201室" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">负责人</label>
+                    <select id="eq-manager" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <!-- Dynamic options -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+                    <textarea id="eq-note" rows="2" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="adminApp.closeEquipmentModal()" class="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50">取消</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reservation Modal -->
+    <div id="reservation-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center hidden">
+        <div class="bg-white rounded-xl w-full max-w-md mx-4">
+            <div class="px-6 py-4 border-b flex justify-between items-center">
+                <h3 class="text-lg font-bold">预约设备</h3>
+                <button onclick="adminApp.closeReservationModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="reservation-form" class="p-6 space-y-4">
+                <input type="hidden" id="resv-equipment-id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">设备</label>
+                    <input type="text" id="resv-equipment-name" readonly class="w-full px-3 py-2 bg-gray-100 border rounded-lg">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">开始时间</label>
+                        <input type="datetime-local" id="resv-start" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">结束时间</label>
+                        <input type="datetime-local" id="resv-end" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">用途</label>
+                    <textarea id="resv-purpose" rows="2" required class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="adminApp.closeReservationModal()" class="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50">取消</button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">提交预约</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../shared/js/supabase.js"></script>
+    <script src="../shared/js/utils.js"></script>
+    <script src="../shared/components/sidebar.js"></script>
+    <script src="js/admin.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.adminApp = new AdminApp('equipment');
+        });
+    </script>
+</body>
+</html>
