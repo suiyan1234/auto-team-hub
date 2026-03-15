@@ -419,3 +419,5 @@ const API = {
 // 导出全局
 window.supabaseClient = supabase;
 window.API = API;
+// 在 supabase.js 的最后一行添加
+console.log("Supabase Client 初始化完成：", supabase);
