@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "public": true,
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/src/auth/login.html" },
+    { "source": "/admin", "destination": "/src/admin/index.html" },
+    { "source": "/user", "destination": "/src/user/index.html" }
+  ]
+}
