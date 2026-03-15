@@ -6,8 +6,8 @@
 // 从config读取配置
 const { supabase: supabaseConfig } = window.AppConfig || {
     supabase: {
-        url: 'https://your-project.supabase.co',
-        anonKey: 'your-anon-key'
+        url: 'https://dlwypgzfoldhzajbnaxv.supabase.co',
+        anonKey: 'sb_publishable_jU_gprs9slrLe2o-GS1T-g_4kNreKy3'
     }
 };
 
