@@ -2,9 +2,10 @@
   "version": 2,
   "public": true,
   "cleanUrls": true,
-  "rewrites": [
-    { "source": "/", "destination": "/src/auth/login.html" },
-    { "source": "/admin", "destination": "/src/admin/index.html" },
-    { "source": "/user", "destination": "/src/user/index.html" }
+  "routes": [
+    { "src": "/", "dest": "/src/auth/login.html" },
+    { "src": "/admin", "dest": "/src/admin/index.html" },
+    { "src": "/user", "dest": "/src/user/index.html" },
+    { "src": "/(.*)", "dest": "/src/$1" }
   ]
 }
