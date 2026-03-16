@@ -2,10 +2,15 @@
   "version": 2,
   "public": true,
   "cleanUrls": true,
+  "buildCommand": null,
+  "outputDirectory": "src",
   "routes": [
-    { "src": "/", "dest": "/src/auth/login.html" },
-    { "src": "/admin", "dest": "/src/admin/index.html" },
-    { "src": "/user", "dest": "/src/user/index.html" },
-    { "src": "/(.*)", "dest": "/src/$1" }
+    { "src": "/", "dest": "/auth/login.html" },
+    { "src": "/admin", "dest": "/admin/index.html" },
+    { "src": "/user", "dest": "/user/index.html" },
+    { "src": "/admin/(.*)", "dest": "/admin/$1" },
+    { "src": "/user/(.*)", "dest": "/user/$1" },
+    { "src": "/shared/(.*)", "dest": "/shared/$1" },
+    { "src": "/auth/(.*)", "dest": "/auth/$1" }
   ]
 }
