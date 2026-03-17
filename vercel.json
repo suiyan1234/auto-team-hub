@@ -4,13 +4,13 @@
   "cleanUrls": true,
   "buildCommand": null,
   "outputDirectory": "src",
-  "routes": [
-    { "src": "/", "dest": "/auth/login.html" },
-    { "src": "/admin", "dest": "/admin/index.html" },
-    { "src": "/user", "dest": "/user/index.html" },
-    { "src": "/admin/(.*)", "dest": "/admin/$1" },
-    { "src": "/user/(.*)", "dest": "/user/$1" },
-    { "src": "/shared/(.*)", "dest": "/shared/$1" },
-    { "src": "/auth/(.*)", "dest": "/auth/$1" }
+  "rewrites": [
+    { "source": "/", "destination": "/auth/login.html" },
+    { "source": "/admin", "destination": "/admin/index.html" },
+    { "source": "/user", "destination": "/user/index.html" },
+    { "source": "/admin/:path*", "destination": "/admin/:path*" },
+    { "source": "/user/:path*", "destination": "/user/:path*" },
+    { "source": "/auth/:path*", "destination": "/auth/:path*" },
+    { "source": "/shared/:path*", "destination": "/shared/:path*" }
   ]
 }
