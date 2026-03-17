@@ -2,15 +2,16 @@
   "version": 2,
   "public": true,
   "cleanUrls": true,
-  "buildCommand": null,
-  "outputDirectory": "src",
-  "rewrites": [
-    { "source": "/", "destination": "/auth/login.html" },
-    { "source": "/admin", "destination": "/admin/index.html" },
-    { "source": "/user", "destination": "/user/index.html" },
-    { "source": "/admin/:path*", "destination": "/admin/:path*" },
-    { "source": "/user/:path*", "destination": "/user/:path*" },
-    { "source": "/auth/:path*", "destination": "/auth/:path*" },
-    { "source": "/shared/:path*", "destination": "/shared/:path*" }
+  "builds": [
+    {
+      "src": "src/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/", "dest": "/auth/login.html" },
+    { "src": "/admin", "dest": "/admin/index.html" },
+    { "src": "/user", "dest": "/user/index.html" },
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }
