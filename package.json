@@ -1,7 +1,5 @@
 {
   "name": "auto-team-hub",
   "version": "1.0.0",
-  "scripts": {
-    "build": "echo 'Static build - no compilation needed'"
-  }
+  "private": true
 }
