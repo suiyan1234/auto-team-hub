@@ -2,16 +2,12 @@
   "version": 2,
   "public": true,
   "cleanUrls": true,
-  "builds": [
-    {
-      "src": "src/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    { "src": "/", "dest": "/auth/login.html" },
-    { "src": "/admin", "dest": "/admin/index.html" },
-    { "src": "/user", "dest": "/user/index.html" },
-    { "src": "/(.*)", "dest": "/$1" }
+  "framework": null,
+  "buildCommand": null,
+  "outputDirectory": "src",
+  "redirects": [
+    { "source": "/", "destination": "/auth/login.html", "permanent": false },
+    { "source": "/admin", "destination": "/admin/index.html", "permanent": false },
+    { "source": "/user", "destination": "/user/index.html", "permanent": false }
   ]
 }
