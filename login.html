@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - Auto Team Hub</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0f1c 0%, #1a1f3a 100%);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .glass-card {
+            background: rgba(21, 27, 46, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+        }
+        
+        .input-field {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            transition: all 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .robot-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <div class="w-full max-w-md animate-fade-in">
+        <!-- Logo区域 -->
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-gradient-to-br from-blue-600 via-cyan-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/30 robot-float">
+                <i class="fas fa-robot text-white text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-white tracking-tight">Auto Team Hub</h1>
+            <p class="text-slate-400 mt-2 text-sm">综合测试自动化中心</p>
+        </div>
+        
+        <!-- 登录表单 -->
+        <div class="glass-card p-8">
+            <h2 class="text-xl font-semibold text-white mb-6 text-center">欢迎回来</h2>
+            
+            <form id="loginForm" class="space-y-5">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">邮箱地址</label>
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            required
+                            class="input-field w-full pl-10 pr-4 py-3 rounded-lg text-white placeholder-slate-500"
+                            placeholder="your.email@company.com"
+                        >
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">密码</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            required
+                            class="input-field w-full pl-10 pr-10 py-3 rounded-lg text-white placeholder-slate-500"
+                            placeholder="••••••••"
+                        >
+                        <button 
+                            type="button"
+                            onclick="togglePassword()"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                        >
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between text-sm">
+                    <label class="flex items-center text-slate-400 cursor-pointer">
+                        <input type="checkbox" id="remember" class="mr-2 rounded bg-slate-800 border-slate-600">
+                        记住我
+                    </label>
+                    <a href="#" onclick="forgotPassword()" class="text-blue-400 hover:text-blue-300">忘记密码？</a>
+                </div>
+                
+                <button 
+                    type="submit" 
+                    id="submitBtn"
+                    class="btn-primary w-full py-3 rounded-lg text-white font-medium flex items-center justify-center space-x-2"
+                >
+                    <span>登录</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+            
+            <!-- 错误提示 -->
+            <div id="errorMsg" class="hidden mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm text-center"></div>
+            
+            <!-- 加载状态 -->
+            <div id="loadingMsg" class="hidden mt-4 text-center text-slate-400 text-sm">
+                <i class="fas fa-spinner fa-spin mr-2"></i>
+                登录中...
+            </div>
+        </div>
+        
+        <!-- 底部信息 -->
+        <p class="text-center text-slate-500 text-sm mt-6">
+            首次使用？请联系管理员开通账号
+        </p>
+    </div>
+
+    <script>
+        // 配置（替换为你的Supabase信息）
+        const SUPABASE_URL = 'https://your-project.supabase.co';
+        const SUPABASE_KEY = 'your-anon-key';
+        
+        // 初始化Supabase
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // 检查是否已登录
+        async function checkSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                await redirectByRole();
+            }
+        }
+        
+        // 页面加载时检查
+        checkSession();
+        
+        // 切换密码显示
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const icon = document.getElementById('toggleIcon');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+        
+        // 登录表单提交
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const submitBtn = document.getElementById('submitBtn');
+            const errorMsg = document.getElementById('errorMsg');
+            const loadingMsg = document.getElementById('loadingMsg');
+            
+            // 重置状态
+            errorMsg.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 登录中...';
+            
+            try {
+                // 执行登录
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) throw error;
+                
+                // 获取用户角色
+                const { data: profile } = await supabase
+                    .from('user_profiles')
+                    .select('role, personnel_id')
+                    .eq('id', data.user.id)
+                    .single();
+                
+                if (!profile) {
+                    throw new Error('用户配置不存在，请联系管理员');
+                }
+                
+                // 更新最后登录时间
+                await supabase
+                    .from('user_profiles')
+                    .update({ last_login: new Date().toISOString() })
+                    .eq('id', data.user.id);
+                
+                // 根据角色跳转
+                if (profile.role === 'user') {
+                    window.location.href = '/user/index.html';
+                } else {
+                    window.location.href = '/admin/index.html';
+                }
+                
+            } catch (err) {
+                // 显示错误
+                errorMsg.textContent = err.message === 'Invalid login credentials' 
+                    ? '邮箱或密码错误' 
+                    : err.message;
+                errorMsg.classList.remove('hidden');
+                
+                // 恢复按钮
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>登录</span><i class="fas fa-arrow-right"></i>';
+            }
+        });
+        
+        // 忘记密码
+        function forgotPassword() {
+            const email = document.getElementById('email').value;
+            if (!email) {
+                alert('请先输入邮箱地址');
+                return;
+            }
+            
+            supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + '/auth/reset-password.html'
+            }).then(({ error }) => {
+                if (error) {
+                    alert('发送失败：' + error.message);
+                } else {
+                    alert('重置密码链接已发送到您的邮箱');
+                }
+            });
+        }
+        
+        // 自动填充记住的邮箱
+        const rememberedEmail = localStorage.getItem('remembered_email');
+        if (rememberedEmail) {
+            document.getElementById('email').value = rememberedEmail;
+            document.getElementById('remember').checked = true;
+        }
+        
+        // 记住邮箱
+        document.getElementById('remember').addEventListener('change', (e) => {
+            const email = document.getElementById('email').value;
+            if (e.target.checked && email) {
+                localStorage.setItem('remembered_email', email);
+            } else {
+                localStorage.removeItem('remembered_email');
+            }
+        });
+    </script>
+</body>
+</html>
