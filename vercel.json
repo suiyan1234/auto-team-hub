@@ -1,6 +1,14 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/$1" }
-  ],
-  "cleanUrls": true
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "routes": [
+    {
+      "src": "/public/(.*)",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
 }
