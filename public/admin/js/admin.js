@@ -26,7 +26,10 @@ class AdminApp {
 
     async init() {
         await this.checkAuth();
-        this.initSidebar();
+        
+        // ✅ 使用共享侧边栏组件
+        SidebarComponent.render('sidebar', 'admin');
+        
         this.initHeader();
         await this.loadPageData();
         this.setupEventListeners();
@@ -55,43 +58,10 @@ class AdminApp {
         this.currentUser = user;
     }
 
-    initSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const menuItems = [
-            { id: 'dashboard', icon: 'fa-chart-line', text: '管理仪表板', href: 'index.html' },
-            { id: 'personnel', icon: 'fa-users', text: '人员管理', href: 'personnel.html' },
-            { id: 'cases', icon: 'fa-vial', text: 'Test Case管理', href: 'cases.html' },
-            { id: 'equipment', icon: 'fa-server', text: '设备管理', href: 'equipment.html' },
-            { id: 'overtime', icon: 'fa-clock', text: '加班监控', href: 'overtime.html' },
-            { id: 'inventory', icon: 'fa-boxes', text: '物料管理', href: 'inventory.html' }
-        ];
-
-        sidebar.innerHTML = `
-            <div class="p-6 border-b border-white/20">
-                <h1 class="text-2xl font-bold flex items-center gap-2">
-                    <i class="fas fa-users-cog"></i>
-                    Auto Team Hub
-                </h1>
-                <p class="text-xs text-white/70 mt-1">管理控制台</p>
-            </div>
-            
-            <nav class="flex-1 py-6 px-3 space-y-2">
-                ${menuItems.map(item => `
-                    <a href="${item.href}" class="sidebar-item ${this.currentPage === item.id ? 'active' : ''} w-full text-left px-4 py-3 rounded-lg flex items-center gap-3">
-                        <i class="fas ${item.icon} w-5"></i>
-                        <span>${item.text}</span>
-                    </a>
-                `).join('')}
-            </nav>
-            
-            <div class="p-4 border-t border-white/20">
-                <button onclick="adminApp.logout()" class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 hover:bg-white/10">
-                    <i class="fas fa-sign-out-alt w-5"></i>
-                    <span>退出登录</span>
-                </button>
-            </div>
-        `;
-    }
+    /**
+     * ✅ 已删除：initSidebar() 方法
+     * 现在使用 shared/components/sidebar.js 中的 SidebarComponent
+     */
 
     initHeader() {
         const header = document.getElementById('header');
@@ -106,7 +76,6 @@ class AdminApp {
             'inventory': '物料管理'
         };
 
-        // Preserve existing content structure but update title
         const titleEl = header.querySelector('h2');
         if (titleEl) titleEl.textContent = titles[this.currentPage] || '管理后台';
 
@@ -151,7 +120,6 @@ class AdminApp {
 
     // ==================== Dashboard ====================
     async loadDashboardData() {
-        // Load all necessary data for dashboard
         const { data: personnel } = await supabase.from('users').select('*').eq('role', 'user');
         const { data: overtime } = await supabase.from('overtime_records').select('*').gte('date', new Date(new Date().setDate(1)).toISOString());
         const { data: tasks } = await supabase.from('tasks').select('*');
@@ -162,7 +130,7 @@ class AdminApp {
         this.data.tasks = tasks || [];
         this.data.equipment = equipment || [];
 
-        // Update KPI cards
+        // 更新KPI卡片
         document.getElementById('total-employees').textContent = this.data.personnel.length;
         
         const totalOT = this.data.overtime.reduce((sum, r) => sum + (r.hours || 0), 0);
@@ -176,14 +144,12 @@ class AdminApp {
         const utilization = this.data.equipment.length > 0 ? Math.round((runningEquip / this.data.equipment.length) * 100) : 0;
         document.getElementById('equipment-utilization').textContent = utilization + '%';
 
-        // Initialize charts
         this.initDashboardCharts();
         this.updateAlerts();
         this.updateRealTimeStatus();
     }
 
     initDashboardCharts() {
-        // Department overtime chart
         const deptCtx = document.getElementById('deptOvertimeChart')?.getContext('2d');
         if (deptCtx) {
             const deptStats = this.calculateDeptOvertime();
@@ -206,7 +172,6 @@ class AdminApp {
             });
         }
 
-        // Task status chart
         const taskCtx = document.getElementById('taskStatusChart')?.getContext('2d');
         if (taskCtx) {
             const statusCount = {
@@ -252,7 +217,7 @@ class AdminApp {
     updateAlerts() {
         const alerts = [];
         
-        // Overtime alerts
+        // 加班预警
         this.data.personnel.forEach(p => {
             const userOT = this.data.overtime
                 .filter(r => r.user_id === p.id)
@@ -268,7 +233,7 @@ class AdminApp {
             }
         });
 
-        // Equipment alerts
+        // 设备故障预警
         const errorEquip = this.data.equipment.filter(e => e.status === 'error');
         errorEquip.forEach(e => {
             alerts.push({
@@ -279,7 +244,7 @@ class AdminApp {
             });
         });
 
-        // Update alert display
+        // 更新预警显示
         const container = document.getElementById('alert-list');
         const badge = document.getElementById('notification-badge');
         
@@ -304,7 +269,6 @@ class AdminApp {
     }
 
     updateRealTimeStatus() {
-        // Online users
         const onlineContainer = document.getElementById('online-users');
         if (onlineContainer) {
             const activeUsers = this.data.personnel.slice(0, 5);
@@ -316,7 +280,6 @@ class AdminApp {
             document.getElementById('online-count').textContent = `${this.data.personnel.length} 人在线`;
         }
 
-        // Equipment status
         const equipContainer = document.getElementById('equipment-status');
         if (equipContainer) {
             const recentEquip = this.data.equipment.slice(0, 3);
@@ -330,7 +293,6 @@ class AdminApp {
             `).join('');
         }
 
-        // Pending approvals
         const pendingContainer = document.getElementById('pending-approvals');
         if (pendingContainer) {
             const pendingOT = this.data.overtime.filter(r => r.status === 'pending').length;
@@ -361,7 +323,6 @@ class AdminApp {
         const ctx = document.getElementById('deptTrendChart')?.getContext('2d');
         if (!ctx) return;
 
-        // Get overtime data for trend
         const months = [];
         const datasets = {};
         const depts = [...new Set(this.data.personnel.map(p => p.department))];
@@ -373,7 +334,7 @@ class AdminApp {
         }
 
         depts.forEach(dept => {
-            datasets[dept] = months.map(() => Math.random() * 100 + 50); // Mock data
+            datasets[dept] = months.map(() => Math.random() * 100 + 50);
         });
 
         this.charts.deptTrend = new Chart(ctx, {
@@ -391,9 +352,7 @@ class AdminApp {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'top' }
-                }
+                plugins: { legend: { position: 'top' } }
             }
         });
     }
@@ -486,10 +445,8 @@ class AdminApp {
         if (dept) filtered = filtered.filter(p => p.department === dept);
         if (status) filtered = filtered.filter(p => p.status === status);
         
-        // Re-render with filtered data
         this.data.personnel = filtered;
         this.renderPersonnel();
-        // Restore original data
         this.loadPersonnelData();
     }
 
@@ -732,7 +689,6 @@ class AdminApp {
     }
 
     filterCases() {
-        // Similar to filterPersonnel
         this.loadCasesData();
     }
 
@@ -804,7 +760,6 @@ class AdminApp {
 
             this.caseUploadData = jsonData;
             
-            // Show preview
             const headers = jsonData[0];
             const rows = jsonData.slice(1, 6);
             
@@ -928,7 +883,7 @@ class AdminApp {
             const d = new Date();
             d.setDate(d.getDate() - i);
             days.push(d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }));
-            data.push(Math.floor(Math.random() * 30) + 70); // Mock utilization data
+            data.push(Math.floor(Math.random() * 30) + 70);
         }
 
         this.charts.equipment = new Chart(ctx, {
@@ -962,7 +917,6 @@ class AdminApp {
         document.getElementById('equipment-modal').classList.remove('hidden');
         document.getElementById('equipment-modal').classList.add('flex');
         
-        // Populate manager select
         const select = document.getElementById('eq-manager');
         select.innerHTML = this.data.personnel.map(p => 
             `<option value="${p.id}">${p.name}</option>`
@@ -1037,7 +991,6 @@ class AdminApp {
         const ctx = document.getElementById('overtimeChart')?.getContext('2d');
         if (!ctx) return;
 
-        // Group by department
         const deptStats = {};
         this.data.overtime.forEach(r => {
             const dept = r.users?.department || '未知';
@@ -1063,9 +1016,7 @@ class AdminApp {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                }
+                plugins: { legend: { display: false } }
             }
         });
     }
@@ -1074,7 +1025,6 @@ class AdminApp {
         const tbody = document.getElementById('warning-table');
         if (!tbody) return;
 
-        // Calculate user overtime stats
         const userStats = {};
         this.data.overtime.forEach(r => {
             if (!userStats[r.user_id]) {
@@ -1273,7 +1223,7 @@ class AdminApp {
         }
     }
 
-       renderTransactions() {
+    renderTransactions() {
         const tbody = document.getElementById('transaction-table');
         if (!tbody) return;
 
@@ -1422,10 +1372,9 @@ class AdminApp {
             if (id) {
                 ({ error } = await supabase.from('users').update(data).eq('id', id));
             } else {
-                // Create auth user first, then insert to users table
                 const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: data.email,
-                    password: '123456', // Default password, should be changed on first login
+                    password: '123456',
                     options: {
                         data: { name: data.name, role: data.role }
                     }
@@ -1570,20 +1519,17 @@ class AdminApp {
             const quantity = parseInt(document.getElementById('stock-quantity').value);
             const note = document.getElementById('stock-note').value;
 
-            // Get current item
             const item = this.data.inventory.find(i => i.id === itemId);
             if (!item) {
                 alert('物料不存在');
                 return;
             }
 
-            // Check stock for out operation
             if (type === 'out' && item.quantity < quantity) {
                 alert('库存不足');
                 return;
             }
 
-            // Update inventory quantity
             const newQuantity = type === 'in' ? item.quantity + quantity : item.quantity - quantity;
             const { error: updateError } = await supabase
                 .from('inventory')
@@ -1595,7 +1541,6 @@ class AdminApp {
                 return;
             }
 
-            // Create transaction record
             const { error: transError } = await supabase.from('inventory_transactions').insert([{
                 inventory_id: itemId,
                 type: type,
@@ -1668,22 +1613,20 @@ class AdminApp {
         }, 500);
     }
 
-    async logout() {
-        await supabase.auth.signOut();
-        window.location.href = '../auth/login.html';
-    }
+    /**
+     * ✅ 已删除：logout() 方法
+     * 现在使用 SidebarComponent.logout()
+     */
 
     viewUserOvertime(userId) {
-        // Navigate to overtime page with user filter
         localStorage.setItem('overtime_filter_user', userId);
         window.location.href = 'overtime.html';
     }
 
     rejectOvertime(id) {
-        // Similar to approve but set status to rejected
         alert('驳回功能开发中...');
     }
 }
 
-// Make adminApp globally available
+// 导出到全局
 window.AdminApp = AdminApp;
