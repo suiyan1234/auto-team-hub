@@ -11,33 +11,36 @@ class UserApp {
         this.overtimeRecords = [];
         this.chart = null;
         this.currentPeriod = 'week';
+        this.currentSection = 'dashboard';
         
         this.init();
     }
 
     async init() {
-        // Check authentication
+        // 检查认证
         await this.checkAuth();
         
-        // Initialize UI components
-        this.initSidebar();
+        // ✅ 使用共享侧边栏组件
+        SidebarComponent.render('sidebar', 'user');
+        
+        // 初始化头部
         this.initHeader();
         
-        // Load user data
+        // 加载用户数据
         await this.loadUserData();
         
-        // Initialize charts
+        // 初始化图表
         this.initChart();
         
-        // Setup event listeners
+        // 设置事件监听
         this.setupEventListeners();
         
-        // Show dashboard by default
+        // 默认显示仪表板
         this.showSection('dashboard');
     }
 
     async checkAuth() {
-        // Check if user is logged in via Supabase
+        // 检查是否登录
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error || !session) {
@@ -45,7 +48,7 @@ class UserApp {
             return;
         }
 
-        // Get user profile
+        // 获取用户资料
         const { data: user, error: userError } = await supabase
             .from('users')
             .select('*')
@@ -59,54 +62,17 @@ class UserApp {
 
         this.currentUser = user;
         
-        // Verify role is user (not admin)
+        // 验证角色（管理员重定向到管理端）
         if (user.role === 'admin') {
             window.location.href = '../admin/index.html';
             return;
         }
     }
 
-    initSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        sidebar.innerHTML = `
-            <div class="p-6 border-b border-white/20">
-                <h1 class="text-2xl font-bold flex items-center gap-2">
-                    <i class="fas fa-users-cog"></i>
-                    Auto Team Hub
-                </h1>
-                <p class="text-xs text-white/70 mt-1">用户中心</p>
-            </div>
-            
-            <nav class="flex-1 py-6 px-3 space-y-2">
-                <button onclick="userApp.showSection('dashboard')" class="sidebar-item active w-full text-left px-4 py-3 rounded-lg flex items-center gap-3" data-section="dashboard">
-                    <i class="fas fa-chart-line w-5"></i>
-                    <span>仪表板</span>
-                </button>
-                
-                <button onclick="userApp.showSection('tasks')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3" data-section="tasks">
-                    <i class="fas fa-tasks w-5"></i>
-                    <span>我的任务</span>
-                </button>
-                
-                <button onclick="userApp.showSection('overtime')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3" data-section="overtime">
-                    <i class="fas fa-clock w-5"></i>
-                    <span>加班记录</span>
-                </button>
-                
-                <button onclick="userApp.showSection('profile')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3" data-section="profile">
-                    <i class="fas fa-user w-5"></i>
-                    <span>个人信息</span>
-                </button>
-            </nav>
-            
-            <div class="p-4 border-t border-white/20">
-                <button onclick="userApp.logout()" class="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 hover:bg-white/10">
-                    <i class="fas fa-sign-out-alt w-5"></i>
-                    <span>退出登录</span>
-                </button>
-            </div>
-        `;
-    }
+    /**
+     * ✅ 已删除：initSidebar() 方法
+     * 现在使用 shared/components/sidebar.js 中的 SidebarComponent
+     */
 
     initHeader() {
         const header = document.getElementById('header');
@@ -152,7 +118,7 @@ class UserApp {
     async loadUserData() {
         if (!this.currentUser) return;
 
-        // Load tasks assigned to user
+        // 加载任务
         const { data: tasks, error: tasksError } = await supabase
             .from('tasks')
             .select('*')
@@ -163,7 +129,7 @@ class UserApp {
             this.tasks = tasks || [];
         }
 
-        // Load overtime records
+        // 加载加班记录
         const { data: records, error: recordsError } = await supabase
             .from('overtime_records')
             .select('*')
@@ -174,7 +140,7 @@ class UserApp {
             this.overtimeRecords = records || [];
         }
 
-        // Update UI
+        // 更新UI
         this.updateDashboard();
         this.renderTasks();
         this.renderOvertimeTable();
@@ -184,13 +150,13 @@ class UserApp {
     updateDashboard() {
         if (!this.currentUser) return;
 
-        // Calculate stats
+        // 统计数据
         const monthOT = this.calculateMonthOT();
         const completedTasks = this.tasks.filter(t => t.status === 'completed').length;
         const totalTasks = this.tasks.length;
         const autoCases = this.tasks.reduce((sum, t) => sum + (t.automated_cases || 0), 0);
         
-        // Update cards
+        // 更新卡片
         document.getElementById('user-month-ot').textContent = monthOT + 'h';
         document.getElementById('user-ot-progress').style.width = Math.min((monthOT / 40) * 100, 100) + '%';
         document.getElementById('user-tasks-completed').textContent = `${completedTasks}/${totalTasks}`;
@@ -199,10 +165,8 @@ class UserApp {
         document.getElementById('user-status').textContent = this.getStatusLabel(this.currentUser.status);
         document.getElementById('user-current-task').textContent = this.currentUser.current_task || '无进行任务';
 
-        // Update chart
+        // 更新图表和活动
         this.updateChart();
-
-        // Update recent activity
         this.updateRecentActivity();
     }
 
@@ -226,7 +190,8 @@ class UserApp {
     }
 
     initChart() {
-        const ctx = document.getElementById('personalOvertimeChart').getContext('2d');
+        const ctx = document.getElementById('personalOvertimeChart')?.getContext('2d');
+        if (!ctx) return;
         
         this.chart = new Chart(ctx, {
             type: 'line',
@@ -249,27 +214,14 @@ class UserApp {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
+                plugins: { legend: { display: false } },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0,0,0,0.05)'
-                        },
-                        title: {
-                            display: true,
-                            text: '小时'
-                        }
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        title: { display: true, text: '小时' }
                     },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
+                    x: { grid: { display: false } }
                 }
             }
         });
@@ -282,23 +234,19 @@ class UserApp {
         let data = [];
         
         if (this.currentPeriod === 'week') {
-            // Last 7 days
+            // 最近7天
             for (let i = 6; i >= 0; i--) {
                 const d = new Date();
                 d.setDate(d.getDate() - i);
-                const dateStr = d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
-                labels.push(dateStr);
+                labels.push(d.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }));
                 
                 const hours = this.overtimeRecords
-                    .filter(r => {
-                        const rDate = new Date(r.date);
-                        return rDate.toDateString() === d.toDateString();
-                    })
+                    .filter(r => new Date(r.date).toDateString() === d.toDateString())
                     .reduce((sum, r) => sum + (r.hours || 0), 0);
                 data.push(hours);
             }
         } else if (this.currentPeriod === 'month') {
-            // Last 30 days by week
+            // 最近4周
             for (let i = 3; i >= 0; i--) {
                 const endDate = new Date();
                 endDate.setDate(endDate.getDate() - (i * 7));
@@ -316,7 +264,7 @@ class UserApp {
                 data.push(hours);
             }
         } else {
-            // Last 12 months
+            // 最近12个月
             for (let i = 11; i >= 0; i--) {
                 const d = new Date();
                 d.setMonth(d.getMonth() - i);
@@ -340,7 +288,7 @@ class UserApp {
     changePeriod(period) {
         this.currentPeriod = period;
         
-        // Update button styles
+        // 更新按钮样式
         document.querySelectorAll('.period-btn').forEach(btn => {
             if (btn.dataset.period === period) {
                 btn.classList.remove('hover:bg-gray-100');
@@ -358,7 +306,7 @@ class UserApp {
         const container = document.getElementById('recent-activity');
         const activities = [];
         
-        // Add recent tasks
+        // 添加最近任务
         this.tasks.slice(0, 3).forEach(t => {
             activities.push({
                 type: 'task',
@@ -369,7 +317,7 @@ class UserApp {
             });
         });
         
-        // Add recent overtime
+        // 添加最近加班记录
         this.overtimeRecords.slice(0, 3).forEach(r => {
             activities.push({
                 type: 'overtime',
@@ -380,7 +328,7 @@ class UserApp {
             });
         });
         
-        // Sort by time
+        // 按时间排序
         activities.sort((a, b) => new Date(b.time) - new Date(a.time));
         
         container.innerHTML = activities.slice(0, 5).map(act => `
@@ -409,7 +357,7 @@ class UserApp {
     formatTime(timeStr) {
         const date = new Date(timeStr);
         const now = new Date();
-        const diff = (now - date) / 1000 / 60; // minutes
+        const diff = (now - date) / 1000 / 60;
         
         if (diff < 60) return '刚刚';
         if (diff < 1440) return Math.floor(diff / 60) + '小时前';
@@ -510,13 +458,13 @@ class UserApp {
         const { error } = await supabase
             .from('tasks')
             .update({
-                progress: parseInt(formData.get('progress')),
-                status: formData.get('status'),
-                note: formData.get('note'),
+                progress: parseInt(document.getElementById('task-progress').value),
+                status: document.getElementById('task-status').value,
+                note: document.getElementById('task-note').value,
                 updated_at: new Date().toISOString()
             })
             .eq('id', taskId)
-            .eq('assigned_to', this.currentUser.id); // Security check
+            .eq('assigned_to', this.currentUser.id);
 
         if (error) {
             alert('更新失败: ' + error.message);
@@ -578,15 +526,15 @@ class UserApp {
     }
 
     async addOvertimeRecord(formData) {
-        const date = formData.get('date');
-        const startTime = formData.get('start_time');
-        const endTime = formData.get('end_time');
+        const date = document.getElementById('ot-date').value;
+        const startTime = document.getElementById('ot-start').value;
+        const endTime = document.getElementById('ot-end').value;
         
-        // Calculate hours
+        // 计算小时数
         const start = new Date(`2000-01-01T${startTime}`);
         const end = new Date(`2000-01-01T${endTime}`);
         let hours = (end - start) / (1000 * 60 * 60);
-        if (hours < 0) hours += 24; // Cross midnight
+        if (hours < 0) hours += 24;
         
         const { error } = await supabase
             .from('overtime_records')
@@ -596,8 +544,8 @@ class UserApp {
                 start_time: startTime,
                 end_time: endTime,
                 hours: Math.round(hours * 10) / 10,
-                type: formData.get('type'),
-                content: formData.get('content'),
+                type: document.getElementById('ot-type').value,
+                content: document.getElementById('ot-content').value,
                 status: 'pending',
                 created_at: new Date().toISOString()
             }]);
@@ -622,13 +570,12 @@ class UserApp {
         document.getElementById('profile-status').value = this.currentUser.status || 'idle';
         document.getElementById('profile-current-task').value = this.currentUser.current_task || '';
         
-        // Render skills
         this.renderSkills();
     }
 
     renderSkills() {
         const container = document.getElementById('skill-tags');
-        const skills = this.currentUser.skills || [];
+        const skills = this.currentUser?.skills || [];
         
         container.innerHTML = skills.map(skill => `
             <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center gap-2">
@@ -674,7 +621,7 @@ class UserApp {
         
         if (!skill) return;
         
-        const skills = this.currentUser.skills || [];
+        const skills = this.currentUser?.skills || [];
         if (skills.includes(skill)) {
             alert('该技能已存在');
             return;
@@ -693,7 +640,7 @@ class UserApp {
     }
 
     async removeSkill(skill) {
-        const skills = (this.currentUser.skills || []).filter(s => s !== skill);
+        const skills = (this.currentUser?.skills || []).filter(s => s !== skill);
         
         const { error } = await supabase
             .from('users')
@@ -709,20 +656,14 @@ class UserApp {
     showSection(section) {
         this.currentSection = section;
         
-        // Hide all sections
+        // 隐藏所有 section
         document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
         document.getElementById('section-' + section).classList.remove('hidden');
         
-        // Update sidebar active state
-        document.querySelectorAll('.sidebar-item').forEach(item => {
-            if (item.dataset.section === section) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
-        });
+        // 更新侧边栏激活状态（通过 SidebarComponent）
+        SidebarComponent.setActive(section);
         
-        // Update header title
+        // 更新头部标题
         const titles = {
             'dashboard': '个人仪表板',
             'tasks': '我的任务',
@@ -733,43 +674,40 @@ class UserApp {
         const titleEl = document.querySelector('#header h2');
         if (titleEl) titleEl.textContent = titles[section];
         
-        // Refresh data when switching sections
-        if (section === 'dashboard') {
-            this.updateDashboard();
-        } else if (section === 'tasks') {
-            this.renderTasks();
-        } else if (section === 'overtime') {
-            this.renderOvertimeTable();
-        }
+        // 切换 section 时刷新数据
+        if (section === 'dashboard') this.updateDashboard();
+        else if (section === 'tasks') this.renderTasks();
+        else if (section === 'overtime') this.renderOvertimeTable();
     }
 
     setupEventListeners() {
-        // Overtime form
+        // 加班表单
         document.getElementById('overtime-form')?.addEventListener('submit', (e) => {
             e.preventDefault();
-            const formData = new FormData(e.target);
-            this.addOvertimeRecord(formData);
+            this.addOvertimeRecord();
         });
         
-        // Task update form
+        // 任务更新表单
         document.getElementById('task-update-form')?.addEventListener('submit', (e) => {
             e.preventDefault();
-            const formData = new FormData(e.target);
-            this.updateTask(formData);
+            this.updateTask();
         });
     }
 
     async refreshData() {
         const btn = document.querySelector('.fa-sync-alt');
-        btn.classList.add('fa-spin');
+        btn?.classList.add('fa-spin');
         
         await this.loadUserData();
         
-        setTimeout(() => btn.classList.remove('fa-spin'), 500);
+        setTimeout(() => btn?.classList.remove('fa-spin'), 500);
     }
 
-    async logout() {
-        await supabase.auth.signOut();
-        window.location.href = '../auth/login.html';
-    }
+    /**
+     * ✅ 已删除：logout() 方法
+     * 现在使用 SidebarComponent.logout()
+     */
 }
+
+// 导出到全局
+window.UserApp = UserApp;
