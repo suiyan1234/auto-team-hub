@@ -1,23 +1,13 @@
 /**
  * Auto Team Hub - 侧边栏组件
- * 统一的管理员/用户侧边栏，支持角色切换
  */
 
 const SidebarComponent = {
-    // 当前激活的菜单
     activeMenu: '',
 
-    /**
-     * 渲染侧边栏
-     * @param {string} containerId - 容器ID，默认 'sidebar'
-     * @param {string} role - 角色：'user' | 'admin' | 'super_admin'
-     */
     render(containerId = 'sidebar', role = 'user') {
         const container = document.getElementById(containerId);
-        if (!container) {
-            console.error(`Sidebar container #${containerId} not found`);
-            return;
-        }
+        if (!container) return;
 
         const menus = this.getMenus(role);
         
@@ -52,39 +42,34 @@ const SidebarComponent = {
             </div>
         `;
 
-        // 根据当前页面自动设置激活状态
         this.autoActivate();
     },
 
-    /**
-     * 获取菜单配置
-     */
     getMenus(role) {
         const commonMenus = [
             { 
                 id: 'dashboard', 
                 label: '仪表板', 
                 icon: 'fa-th-large', 
-                path: role === 'user' ? '/user/index.html' : '/admin/index.html' 
+                path: role === 'user' ? '/public/user/index.html' : '/public/admin/index.html' 
             }
         ];
 
         if (role === 'user') {
             return [
                 ...commonMenus,
-                { id: 'tasks', label: '我的任务', icon: 'fa-tasks', path: '/user/index.html#tasks' },
-                { id: 'overtime', label: '加班记录', icon: 'fa-clock', path: '/user/index.html#overtime' },
-                { id: 'profile', label: '个人信息', icon: 'fa-user', path: '/user/index.html#profile' }
+                { id: 'tasks', label: '我的任务', icon: 'fa-tasks', path: '/public/user/index.html#tasks' },
+                { id: 'overtime', label: '加班记录', icon: 'fa-clock', path: '/public/user/index.html#overtime' },
+                { id: 'profile', label: '个人信息', icon: 'fa-user', path: '/public/user/index.html#profile' }
             ];
         }
 
-        // admin / super_admin 菜单
         const adminMenus = [
-            { id: 'personnel', label: '人员管理', icon: 'fa-users', path: '/admin/personnel.html' },
-            { id: 'cases', label: 'Test Case', icon: 'fa-clipboard-check', path: '/admin/cases.html' },
-            { id: 'equipment', label: '设备资源', icon: 'fa-server', path: '/admin/equipment.html' },
-            { id: 'overtime', label: '加班管控', icon: 'fa-clock', path: '/admin/overtime.html' },
-            { id: 'inventory', label: '物料管理', icon: 'fa-boxes', path: '/admin/inventory.html' }
+            { id: 'personnel', label: '人员管理', icon: 'fa-users', path: '/public/admin/personnel.html' },
+            { id: 'cases', label: 'Test Case', icon: 'fa-clipboard-check', path: '/public/admin/cases.html' },
+            { id: 'equipment', label: '设备资源', icon: 'fa-server', path: '/public/admin/equipment.html' },
+            { id: 'overtime', label: '加班管控', icon: 'fa-clock', path: '/public/admin/overtime.html' },
+            { id: 'inventory', label: '物料管理', icon: 'fa-boxes', path: '/public/admin/inventory.html' }
         ];
 
         if (role === 'super_admin') {
@@ -92,16 +77,13 @@ const SidebarComponent = {
                 id: 'settings', 
                 label: '系统设置', 
                 icon: 'fa-cog', 
-                path: '/admin/settings.html' 
+                path: '/public/admin/settings.html' 
             });
         }
 
         return [...commonMenus, ...adminMenus];
     },
 
-    /**
-     * 渲染单个菜单项
-     */
     renderMenuItem(menu) {
         const isActive = this.activeMenu === menu.id;
         
@@ -117,35 +99,24 @@ const SidebarComponent = {
         `;
     },
 
-    /**
-     * 处理菜单点击
-     */
     handleClick(menuId, event) {
         const href = event.currentTarget.getAttribute('href');
         
-        // 如果是锚点导航（#），允许默认行为
         if (href.includes('#')) {
             this.setActive(menuId);
             return true;
         }
         
-        // 普通页面跳转，手动处理
         event.preventDefault();
         this.setActive(menuId);
         window.location.href = href;
     },
 
-    /**
-     * 设置激活状态
-     */
     setActive(menuId) {
         this.activeMenu = menuId;
         this.highlightActive();
     },
 
-    /**
-     * 高亮当前菜单
-     */
     highlightActive() {
         document.querySelectorAll('.nav-item').forEach(el => {
             el.classList.remove('active', 'bg-white/20', 'text-white');
@@ -158,66 +129,57 @@ const SidebarComponent = {
         });
     },
 
-    /**
-     * 根据当前页面自动设置激活
-     */
     autoActivate() {
         const path = window.location.pathname;
         const hash = window.location.hash.slice(1);
         
-        // 优先匹配 hash
         if (hash) {
             this.setActive(hash);
             return;
         }
         
-        // 匹配路径
         const menuMap = {
-            '/user/index.html': 'dashboard',
-            '/admin/index.html': 'dashboard',
-            '/admin/personnel.html': 'personnel',
-            '/admin/cases.html': 'cases',
-            '/admin/equipment.html': 'equipment',
-            '/admin/overtime.html': 'overtime',
-            '/admin/inventory.html': 'inventory',
-            '/admin/settings.html': 'settings'
+            '/public/user/index.html': 'dashboard',
+            '/public/admin/index.html': 'dashboard',
+            '/public/admin/personnel.html': 'personnel',
+            '/public/admin/cases.html': 'cases',
+            '/public/admin/equipment.html': 'equipment',
+            '/public/admin/overtime.html': 'overtime',
+            '/public/admin/inventory.html': 'inventory',
+            '/public/admin/settings.html': 'settings'
         };
         
         const menuId = menuMap[path] || 'dashboard';
         this.setActive(menuId);
     },
 
-    /**
-     * 退出登录
-     */
+    // ✅ 关键修复：跳转到根目录的登录页
     async logout() {
-        // 使用原生 confirm，不依赖 Utils
         if (!confirm('确定要退出登录吗？')) {
             return;
         }
 
         try {
-            // 清除本地存储的过滤条件等临时数据
             localStorage.removeItem('overtime_filter_user');
             
-            // 调用 Supabase 退出
             const { error } = await supabase.auth.signOut();
             
             if (error) {
                 console.error('Sign out error:', error);
-                alert('退出失败：' + error.message);
-                return;
             }
 
-            // 跳转到登录页
-            window.location.href = '/auth/login.html';
+            // ✅ 根据您的项目结构，跳转到根目录的登录页
+            // 方式1：绝对路径（如果部署在域名根目录）
+            window.location.href = '/index.html';
+            
+            // 方式2：相对路径（从 public/admin/ 或 public/user/ 回到根目录）
+            // window.location.href = '../../index.html';
             
         } catch (err) {
             console.error('Logout exception:', err);
-            alert('退出时发生错误，请刷新页面重试');
+            window.location.href = '/index.html';
         }
     }
 };
 
-// 导出到全局
 window.SidebarComponent = SidebarComponent;
