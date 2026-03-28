@@ -7,171 +7,1960 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="../shared/css/main.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0f1c 0%, #1a1f3a 100%);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .glass-card {
+            background: rgba(21, 27, 46, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+        }
+        .sidebar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .nav-item {
+            transition: all 0.2s;
+            color: #94a3b8;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
+            border-right: 3px solid #a78bfa;
+        }
+        .content-area {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        .stat-card {
+            background: rgba(21, 27, 46, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .input-field {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+        }
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .alert-card {
+            border-left: 4px solid;
+        }
+        .alert-high { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        .alert-medium { border-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+        .alert-low { border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+        .excel-grid {
+            display: grid;
+            grid-template-columns: 50px repeat(7, 1fr);
+            gap: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .excel-cell {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 8px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+        .excel-header {
+            background: rgba(30, 41, 59, 0.9);
+            font-weight: 600;
+            text-align: center;
+            justify-content: center;
+            color: #94a3b8;
+        }
+        .modal {
+            display: flex;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .text-white { color: white; }
+        .text-slate-300 { color: #cbd5e1; }
+        .text-slate-400 { color: #94a3b8; }
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 92, 246, 0.5);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 92, 246, 0.8);
+        }
+        .permission-denied {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 2rem;
+        }
+        .permission-denied i {
+            font-size: 6rem;
+            color: #ef4444;
+            margin-bottom: 2rem;
+        }
+        .permission-denied h2 {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        .permission-denied p {
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+        .permission-denied button {
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #94a3b8;
+            transition: all 0.2s;
+        }
+        .permission-denied button:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            color: white;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
-    <div class="flex h-screen overflow-hidden">
+<body>
+    <!-- Permission Denied Screen (shown to non-admin users) -->
+    <div id="permission-denied" class="permission-denied hidden">
+        <i class="fas fa-shield-alt"></i>
+        <h2>无管理员权限</h2>
+        <p>您没有权限访问管理仪表板。请联系系统管理员获取访问权限。</p>
+        <button onclick="adminApp.goToUserPage()">
+            <i class="fas fa-arrow-left mr-2"></i>返回用户中心
+        </button>
+        <button onclick="adminApp.logout()" class="ml-4">
+            <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+        </button>
+    </div>
+
+    <!-- Main Admin Interface (shown only to admin users) -->
+    <div id="admin-interface" class="flex h-screen overflow-hidden hidden">
         <!-- Sidebar -->
-        <aside id="sidebar" class="w-64 gradient-bg text-white flex flex-col shadow-2xl">
-            <!-- Injected by sidebar.js -->
+        <aside class="sidebar w-64 flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-white/10">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-600 via-pink-500 to-red-500 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-white">Auto Team Hub</h1>
+                        <p class="text-xs text-slate-400">管理中心</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="flex-1 py-4 space-y-1">
+                <button onclick="adminApp.switchSection('dashboard')" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3 active" data-section="dashboard">
+                    <i class="fas fa-home w-5"></i> 仪表板
+                </button>
+                <button onclick="adminApp.switchSection('users')" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3" data-section="users">
+                    <i class="fas fa-users w-5"></i> 用户管理
+                </button>
+                <button onclick="adminApp.switchSection('overtime')" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3" data-section="overtime">
+                    <i class="fas fa-clock w-5"></i> 加班管理
+                </button>
+                <button onclick="adminApp.switchSection('projects')" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3" data-section="projects">
+                    <i class="fas fa-project-diagram w-5"></i> 项目数据
+                </button>
+                <button onclick="adminApp.switchSection('materials')" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3" data-section="materials">
+                    <i class="fas fa-box w-5"></i> 物料管理
+                </button>
+                <button onclick="adminApp.switchSection('training')" class="nav-item w-full text-left px-6 py-3 flex items-center gap-3" data-section="training">
+                    <i class="fas fa-graduation-cap w-5"></i> 培训管理
+                </button>
+            </nav>
+            <div class="p-4 border-t border-white/10">
+                <button onclick="adminApp.logout()" class="w-full px-4 py-2 rounded-lg border border-white/20 text-slate-400 hover:text-white hover:border-white/40 transition flex items-center gap-2">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </button>
+            </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 overflow-auto">
+        <main class="flex-1 overflow-auto content-area">
             <!-- Header -->
-            <header id="header" class="glass-effect sticky top-0 z-40 px-8 py-4 shadow-sm flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-gray-800">管理仪表板</h2>
+            <header class="sticky top-0 z-40 px-8 py-4 bg-slate-900/80 backdrop-blur-md border-b border-white/10 flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-500" id="current-time"></span>
-                    <button onclick="adminApp.refreshData()" class="p-2 rounded-lg hover:bg-gray-100" title="刷新数据">
-                        <i class="fas fa-sync-alt text-gray-600"></i>
+                    <h2 class="text-xl font-bold text-white" id="page-title">管理仪表板</h2>
+                    <span class="text-sm text-slate-400" id="current-time"></span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="adminApp.refreshData()" class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition" title="刷新数据">
+                        <i class="fas fa-sync-alt"></i>
                     </button>
-                    <button class="p-2 rounded-lg hover:bg-gray-100 relative">
-                        <i class="fas fa-bell text-gray-600"></i>
-                        <span id="notification-badge" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full hidden"></span>
+                    <button class="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition relative">
+                        <i class="fas fa-bell"></i>
+                        <span id="notification-badge" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                     </button>
-                    <div class="flex items-center gap-3 pl-4 border-l">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 text-white flex items-center justify-center text-sm font-bold">
+                    <div class="flex items-center gap-3 pl-4 border-l border-white/10">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-600 text-white flex items-center justify-center text-sm font-bold">
                             A
                         </div>
-                        <span class="text-sm font-medium">管理员</span>
+                        <span class="text-sm font-medium text-white">管理员</span>
                     </div>
                 </div>
             </header>
 
-            <div class="p-8 space-y-6">
-                <!-- KPI Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div class="bg-white rounded-xl p-6 shadow-sm card-hover border-l-4 border-blue-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-sm text-gray-500 mb-1">总员工数</p>
-                                <h3 class="text-3xl font-bold text-gray-800" id="total-employees">0</h3>
-                                <p class="text-xs text-green-500 mt-1"><i class="fas fa-arrow-up"></i> 较上月</p>
+            <div class="p-8 space-y-6" id="main-container">
+                <!-- Dashboard Section -->
+                <section id="section-dashboard" class="space-y-6 slide-in">
+                    <!-- KPI Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="stat-card rounded-xl p-6 border-l-4 border-blue-500">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm text-slate-400 mb-1">总员工数</p>
+                                    <h3 class="text-3xl font-bold text-white" id="total-employees">0</h3>
+                                    <p class="text-xs text-green-400 mt-1"><i class="fas fa-arrow-up"></i> 较上月 +3</p>
+                                </div>
+                                <div class="p-3 bg-blue-500/20 rounded-lg">
+                                    <i class="fas fa-users text-blue-400 text-xl"></i>
+                                </div>
                             </div>
-                            <div class="p-3 bg-blue-100 rounded-lg">
-                                <i class="fas fa-users text-blue-600 text-xl"></i>
+                        </div>
+
+                        <div class="stat-card rounded-xl p-6 border-l-4 border-green-500">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm text-slate-400 mb-1">本月总加班</p>
+                                    <h3 class="text-3xl font-bold text-white" id="total-overtime">0h</h3>
+                                    <p class="text-xs text-orange-400 mt-1" id="ot-trend">同比 +12%</p>
+                                </div>
+                                <div class="p-3 bg-green-500/20 rounded-lg">
+                                    <i class="fas fa-clock text-green-400 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card rounded-xl p-6 border-l-4 border-purple-500">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm text-slate-400 mb-1">任务完成率</p>
+                                    <h3 class="text-3xl font-bold text-white" id="task-completion">0%</h3>
+                                    <p class="text-xs text-slate-400 mt-1">本月目标: 85%</p>
+                                </div>
+                                <div class="p-3 bg-purple-500/20 rounded-lg">
+                                    <i class="fas fa-tasks text-purple-400 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card rounded-xl p-6 border-l-4 border-pink-500">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm text-slate-400 mb-1">自动化覆盖率</p>
+                                    <h3 class="text-3xl font-bold text-white" id="auto-coverage">0%</h3>
+                                    <p class="text-xs text-green-400 mt-1">运行良好</p>
+                                </div>
+                                <div class="p-3 bg-pink-500/20 rounded-lg">
+                                    <i class="fas fa-robot text-pink-400 text-xl"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl p-6 shadow-sm card-hover border-l-4 border-green-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-sm text-gray-500 mb-1">本月总加班</p>
-                                <h3 class="text-3xl font-bold text-gray-800" id="total-overtime">0h</h3>
-                                <p class="text-xs text-orange-500 mt-1" id="ot-trend">统计中...</p>
+                    <!-- Charts Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Department Overtime Overview -->
+                        <div class="glass-card rounded-xl p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-bold text-white">部门加班概览</h3>
+                                <button onclick="adminApp.switchSection('overtime')" class="text-purple-400 text-sm hover:underline">查看详情</button>
                             </div>
-                            <div class="p-3 bg-green-100 rounded-lg">
-                                <i class="fas fa-clock text-green-600 text-xl"></i>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="deptOvertimeChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Task Status Distribution -->
+                        <div class="glass-card rounded-xl p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-bold text-white">任务状态分布</h3>
+                                <button onclick="adminApp.switchSection('projects')" class="text-purple-400 text-sm hover:underline">查看详情</button>
+                            </div>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="taskStatusChart"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl p-6 shadow-sm card-hover border-l-4 border-purple-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-sm text-gray-500 mb-1">任务完成率</p>
-                                <h3 class="text-3xl font-bold text-gray-800" id="task-completion">0%</h3>
-                                <p class="text-xs text-gray-500 mt-1">本月目标: 85%</p>
-                            </div>
-                            <div class="p-3 bg-purple-100 rounded-lg">
-                                <i class="fas fa-tasks text-purple-600 text-xl"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl p-6 shadow-sm card-hover border-l-4 border-orange-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="text-sm text-gray-500 mb-1">设备稼动率</p>
-                                <h3 class="text-3xl font-bold text-gray-800" id="equipment-utilization">0%</h3>
-                                <p class="text-xs text-green-500 mt-1">运行良好</p>
-                            </div>
-                            <div class="p-3 bg-orange-100 rounded-lg">
-                                <i class="fas fa-server text-orange-600 text-xl"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts Row -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Department Overtime Overview -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
+                    <!-- Alert Center -->
+                    <div class="glass-card rounded-xl p-6">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-bold text-gray-800">部门加班概览</h3>
-                            <a href="overtime.html" class="text-blue-600 text-sm hover:underline">查看详情</a>
+                            <h3 class="text-lg font-bold text-white">
+                                <i class="fas fa-exclamation-triangle text-orange-400 mr-2"></i>预警中心
+                            </h3>
+                            <span class="text-sm text-slate-400" id="alert-count">0 个预警</span>
                         </div>
-                        <div class="chart-container" style="height: 300px;">
-                            <canvas id="deptOvertimeChart"></canvas>
+                        <div id="alert-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Dynamic alerts -->
                         </div>
                     </div>
 
-                    <!-- Task Status Distribution -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-bold text-gray-800">任务状态分布</h3>
-                            <a href="cases.html" class="text-blue-600 text-sm hover:underline">查看详情</a>
-                        </div>
-                        <div class="chart-container" style="height: 300px;">
-                            <canvas id="taskStatusChart"></canvas>
+                    <!-- Real-time Status -->
+                    <div class="glass-card rounded-xl p-6">
+                        <h3 class="text-lg font-bold text-white mb-4">实时状态监控</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-slate-800/50 rounded-lg p-4">
+                                <h4 class="font-medium text-slate-300 mb-3">在线人员</h4>
+                                <div id="online-users" class="flex -space-x-2 overflow-hidden mb-2">
+                                    <!-- Dynamic avatars -->
+                                </div>
+                                <p class="text-sm text-slate-400" id="online-count">0 人在线</p>
+                            </div>
+                            
+                            <div class="bg-slate-800/50 rounded-lg p-4">
+                                <h4 class="font-medium text-slate-300 mb-3">设备运行状态</h4>
+                                <div class="space-y-2" id="equipment-status">
+                                    <!-- Dynamic equipment status -->
+                                </div>
+                            </div>
+                            
+                            <div class="bg-slate-800/50 rounded-lg p-4">
+                                <h4 class="font-medium text-slate-300 mb-3">待审批事项</h4>
+                                <ul class="space-y-2 text-sm" id="pending-approvals">
+                                    <!-- Dynamic pending items -->
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <!-- Alert Center -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-bold text-gray-800">
-                            <i class="fas fa-exclamation-triangle text-orange-500 mr-2"></i>预警中心
+                <!-- Users Management Section -->
+                <section id="section-users" class="space-y-6 hidden slide-in">
+                    <div class="glass-card rounded-xl p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-white">用户管理</h3>
+                            <div class="flex gap-2">
+                                <button onclick="adminApp.batchAddUsers()" class="px-4 py-2 btn-primary text-white rounded-lg">
+                                    <i class="fas fa-plus mr-1"></i>批量添加
+                                </button>
+                                <button onclick="adminApp.exportUsers()" class="px-4 py-2 border border-white/20 text-slate-400 hover:text-white hover:border-white/40 rounded-lg">
+                                    <i class="fas fa-download mr-1"></i>导出
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filter Bar -->
+                        <div class="flex gap-4 mb-4">
+                            <input type="text" placeholder="搜索姓名/邮箱/工号..." class="input-field px-4 py-2 rounded-lg flex-1" id="user-search" onkeyup="adminApp.filterUsers()">
+                            <select class="input-field px-4 py-2 rounded-lg" id="user-role-filter" onchange="adminApp.filterUsers()">
+                                <option value="">全部角色</option>
+                                <option value="admin">管理员</option>
+                                <option value="user">普通用户</option>
+                            </select>
+                            <select class="input-field px-4 py-2 rounded-lg" id="user-dept-filter" onchange="adminApp.filterUsers()">
+                                <option value="">全部部门</option>
+                                <option value="auto">自动化测试部</option>
+                                <option value="dev">研发部</option>
+                                <option value="qa">质量保证部</option>
+                            </select>
+                        </div>
+
+                        <!-- Users Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-800/50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">用户信息</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">部门/职位</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">角色</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">入职日期</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">年资</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table" class="divide-y divide-white/10">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Overtime Management Section -->
+                <section id="section-overtime" class="space-y-6 hidden slide-in">
+                    <div class="glass-card rounded-xl p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-white">加班数据管理</h3>
+                            <div class="flex gap-2">
+                                <button onclick="adminApp.importOvertime()" class="px-4 py-2 border border-white/20 text-slate-400 hover:text-white hover:border-white/40 rounded-lg">
+                                    <i class="fas fa-upload mr-1"></i>批量导入
+                                </button>
+                                <button onclick="adminApp.exportOvertimeData()" class="px-4 py-2 border border-white/20 text-slate-400 hover:text-white hover:border-white/40 rounded-lg">
+                                    <i class="fas fa-download mr-1"></i>导出数据
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filter Bar -->
+                        <div class="flex gap-4 mb-4">
+                            <input type="month" class="input-field px-4 py-2 rounded-lg" id="ot-month" value="2024-01">
+                            <select class="input-field px-4 py-2 rounded-lg" id="ot-dept-filter">
+                                <option value="">全部部门</option>
+                                <option value="auto">自动化测试部</option>
+                                <option value="dev">研发部</option>
+                            </select>
+                            <button onclick="adminApp.checkOvertimeAnomaly()" class="px-4 py-2 bg-orange-500/20 text-orange-400 rounded-lg hover:bg-orange-500/30">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>异常检测
+                            </button>
+                        </div>
+
+                        <!-- Overtime Overview Chart -->
+                        <div class="mb-6" style="height: 300px;">
+                            <canvas id="allOvertimeChart"></canvas>
+                        </div>
+
+                        <!-- Employee Overtime Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-800/50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">员工</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">部门</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">本月加班</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">本年累计</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">状态</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="overtime-table-admin" class="divide-y divide-white/10">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Projects Section -->
+                <section id="section-projects" class="space-y-6 hidden slide-in">
+                    <div class="glass-card rounded-xl p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-white">项目数据查看</h3>
+                            <div class="flex gap-2">
+                                <select class="input-field px-4 py-2 rounded-lg" id="project-filter" onchange="adminApp.filterProjects()">
+                                    <option value="">全部项目</option>
+                                    <option value="projectA">项目A</option>
+                                    <option value="projectB">项目B</option>
+                                    <option value="projectC">项目C</option>
+                                </select>
+                                <select class="input-field px-4 py-2 rounded-lg" id="function-filter" onchange="adminApp.filterProjects()">
+                                    <option value="">全部Function</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Project Stats -->
+                        <div class="grid grid-cols-4 gap-4 mb-6">
+                            <div class="text-center p-4 bg-blue-500/10 rounded-lg">
+                                <p class="text-2xl font-bold text-blue-400" id="admin-total-projects">0</p>
+                                <p class="text-sm text-slate-400">总项目数</p>
+                            </div>
+                            <div class="text-center p-4 bg-purple-500/10 rounded-lg">
+                                <p class="text-2xl font-bold text-purple-400" id="admin-total-cases">0</p>
+                                <p class="text-sm text-slate-400">总Case数</p>
+                            </div>
+                            <div class="text-center p-4 bg-green-500/10 rounded-lg">
+                                <p class="text-2xl font-bold text-green-400" id="admin-completion-rate">0%</p>
+                                <p class="text-sm text-slate-400">完成率</p>
+                            </div>
+                            <div class="text-center p-4 bg-pink-500/10 rounded-lg">
+                                <p class="text-2xl font-bold text-pink-400" id="admin-auto-rate">0%</p>
+                                <p class="text-sm text-slate-400">自动化率</p>
+                            </div>
+                        </div>
+
+                        <!-- Function Progress -->
+                        <div class="mb-6">
+                            <h4 class="font-medium text-slate-300 mb-3">各Function完成情况</h4>
+                            <div id="function-progress" class="space-y-3">
+                                <!-- Dynamic progress bars -->
+                            </div>
+                        </div>
+
+                        <!-- Project Detail Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-800/50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">项目名称</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Function</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Case进度</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">自动化</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">状态</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">负责人</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="projects-table" class="divide-y divide-white/10">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Materials Management Section -->
+                <section id="section-materials" class="space-y-6 hidden slide-in">
+                    <div class="glass-card rounded-xl p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-white">物料管理</h3>
+                            <div class="flex gap-2">
+                                <button onclick="adminApp.openInventoryModal()" class="px-4 py-2 btn-secondary text-white rounded-lg">
+                                    <i class="fas fa-warehouse mr-1"></i>库存管理
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filter Bar -->
+                        <div class="flex gap-4 mb-4">
+                            <input type="text" placeholder="搜索物料名称/编号..." class="input-field px-4 py-2 rounded-lg flex-1" id="material-search">
+                            <select class="input-field px-4 py-2 rounded-lg" id="material-status-filter">
+                                <option value="">全部状态</option>
+                                <option value="in">在库</option>
+                                <option value="out">借出</option>
+                                <option value="maintenance">维护中</option>
+                            </select>
+                            <select class="input-field px-4 py-2 rounded-lg" id="material-user-filter">
+                                <option value="">按员工筛选</option>
+                            </select>
+                        </div>
+
+                        <!-- Material Stats -->
+                        <div class="grid grid-cols-4 gap-4 mb-6">
+                            <div class="text-center p-4 bg-green-500/10 rounded-lg">
+                                <p class="text-2xl font-bold text-green-400" id="material-in">0</p>
+                                <p class="text-sm text-slate-400">在库</p>
+                            </div>
+                            <div class="text-center p-4 bg-blue-500/10 rounded-lg">
+                                <p class="text-2xl font-bold text-blue-400" id="material-out">0</p>
+                                <p class="text-sm text-slate-400">借出</p>
+                            </div>
+                            <div class="text-center p-4 bg-yellow-500/10 rounded-lg">
+                                <p class="text-2xl font-bold text-yellow-400" id="material-pending-approval">0</p>
+                                <p class="text-sm text-slate-400">待审批</p>
+                            </div>
+                            <div class="text-center p-4 bg-red-500/10 rounded-lg">
+                                <p class="text-2xl font-bold text-red-400" id="material-maintenance">0</p>
+                                <p class="text-sm text-slate-400">维护中</p>
+                            </div>
+                        </div>
+
+                        <!-- Material Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-800/50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">物料信息</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">负责人</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">领用时间</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">预计归还</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">状态</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="materials-table-admin" class="divide-y divide-white/10">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pending Approvals -->
+                    <div class="glass-card rounded-xl p-6">
+                        <h3 class="text-lg font-bold text-white mb-4">
+                            <i class="fas fa-clipboard-check text-purple-400 mr-2"></i>待审批申请
                         </h3>
-                        <span class="text-sm text-gray-500" id="alert-count">0 个预警</span>
+                        <div id="material-approvals" class="space-y-3">
+                            <!-- Dynamic approvals -->
+                        </div>
                     </div>
-                    <div id="alert-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <!-- Dynamic alerts -->
-                    </div>
-                </div>
+                </section>
 
-                <!-- Real-time Status -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">实时状态监控</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <h4 class="font-medium text-gray-700 mb-3">在线人员</h4>
-                            <div id="online-users" class="flex -space-x-2 overflow-hidden">
-                                <!-- Dynamic avatars -->
-                            </div>
-                            <p class="text-sm text-gray-500 mt-2" id="online-count">0 人在线</p>
+                <!-- Training Section -->
+                <section id="section-training" class="space-y-6 hidden slide-in">
+                    <div class="glass-card rounded-xl p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-white">培训管理</h3>
+                            <button onclick="adminApp.pushTraining()" class="px-4 py-2 btn-primary text-white rounded-lg">
+                                <i class="fas fa-plus mr-1"></i>推送培训
+                            </button>
                         </div>
-                        
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <h4 class="font-medium text-gray-700 mb-3">设备运行状态</h4>
-                            <div class="space-y-2" id="equipment-status">
-                                <!-- Dynamic equipment status -->
-                            </div>
-                        </div>
-                        
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <h4 class="font-medium text-gray-700 mb-3">待审批事项</h4>
-                            <ul class="space-y-2 text-sm" id="pending-approvals">
-                                <!-- Dynamic pending items -->
-                            </ul>
+
+                        <!-- Training List -->
+                        <div class="space-y-4" id="training-list">
+                            <!-- Dynamic training cards -->
                         </div>
                     </div>
-                </div>
+
+                    <!-- Completion Status -->
+                    <div class="glass-card rounded-xl p-6">
+                        <h3 class="text-lg font-bold text-white mb-4">员工完成状态</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-slate-800/50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">培训名称</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">应完成人数</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">已完成</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">完成率</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="training-status-table" class="divide-y divide-white/10">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
 
-    <script src="../shared/js/supabase.js"></script>
-    <script src="../shared/js/utils.js"></script>
-    <script src="../shared/components/sidebar.js"></script>
-    <script src="js/admin.js"></script>
+    <!-- User Edit Modal -->
+    <div id="user-modal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-50 items-center justify-center hidden">
+        <div class="glass-card rounded-xl w-full max-w-md mx-4">
+            <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white">编辑用户权限</h3>
+                <button onclick="adminApp.closeUserModal()" class="text-slate-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="user-edit-form" class="p-6 space-y-4">
+                <input type="hidden" id="edit-user-id">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">姓名</label>
+                    <input type="text" id="edit-user-name" readonly class="input-field w-full px-3 py-2 rounded-lg bg-slate-800/50">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">角色</label>
+                    <select id="edit-user-role" class="input-field w-full px-3 py-2 rounded-lg">
+                        <option value="user">普通用户</option>
+                        <option value="admin">管理员</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">权限设置</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center text-slate-300">
+                            <input type="checkbox" id="perm-overtime" class="mr-2 accent-purple-500"> 加班数据管理
+                        </label>
+                        <label class="flex items-center text-slate-300">
+                            <input type="checkbox" id="perm-project" class="mr-2 accent-purple-500"> 项目数据查看
+                        </label>
+                        <label class="flex items-center text-slate-300">
+                            <input type="checkbox" id="perm-material" class="mr-2 accent-purple-500"> 物料管理
+                        </label>
+                        <label class="flex items-center text-slate-300">
+                            <input type="checkbox" id="perm-training" class="mr-2 accent-purple-500"> 培训推送
+                        </label>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="adminApp.closeUserModal()" class="flex-1 px-4 py-2 border border-white/20 rounded-lg text-slate-400 hover:text-white hover:border-white/40">取消</button>
+                    <button type="submit" class="flex-1 px-4 py-2 btn-primary text-white rounded-lg">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Batch Import Modal -->
+    <div id="import-modal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-50 items-center justify-center hidden">
+        <div class="glass-card rounded-xl w-full max-w-4xl mx-4 max-h-[80vh] overflow-auto">
+            <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white">批量导入加班数据</h3>
+                <button onclick="adminApp.closeImportModal()" class="text-slate-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-slate-400 mb-4">请在下方表格中输入加班数据，或直接粘贴Excel数据</p>
+                <div class="excel-grid mb-4" id="excel-grid">
+                    <div class="excel-cell excel-header"></div>
+                    <div class="excel-cell excel-header">姓名</div>
+                    <div class="excel-cell excel-header">工号</div>
+                    <div class="excel-cell excel-header">日期</div>
+                    <div class="excel-cell excel-header">开始时间</div>
+                    <div class="excel-cell excel-header">结束时间</div>
+                    <div class="excel-cell excel-header">类型</div>
+                    <div class="excel-cell excel-header">工作内容</div>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="adminApp.addExcelRow()" class="px-4 py-2 border border-white/20 rounded-lg text-slate-400 hover:text-white hover:border-white/40">
+                        <i class="fas fa-plus mr-1"></i>添加行
+                    </button>
+                    <button onclick="adminApp.confirmImport()" class="px-4 py-2 btn-primary text-white rounded-lg">
+                        <i class="fas fa-check mr-1"></i>确认导入
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Modal -->
+    <div id="inventory-modal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-50 items-center justify-center hidden">
+        <div class="glass-card rounded-xl w-full max-w-2xl mx-4">
+            <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white">库存管理</h3>
+                <button onclick="adminApp.closeInventoryModal()" class="text-slate-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="flex gap-2 mb-4">
+                    <button onclick="adminApp.switchInventoryTab('in')" class="px-4 py-2 rounded-lg bg-purple-500/20 text-purple-400" id="tab-in">入库</button>
+                    <button onclick="adminApp.switchInventoryTab('out')" class="px-4 py-2 rounded-lg text-slate-400 hover:bg-white/10" id="tab-out">出库</button>
+                    <button onclick="adminApp.switchInventoryTab('check')" class="px-4 py-2 rounded-lg text-slate-400 hover:bg-white/10" id="tab-check">盘点</button>
+                </div>
+                
+                <div id="inventory-in">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">物料名称</label>
+                            <input type="text" id="inv-name" class="input-field w-full px-3 py-2 rounded-lg" placeholder="输入物料名称">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">物料编号</label>
+                            <input type="text" id="inv-code" class="input-field w-full px-3 py-2 rounded-lg" placeholder="输入物料编号">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-slate-400 mb-1">数量</label>
+                            <input type="number" id="inv-qty" class="input-field w-full px-3 py-2 rounded-lg" placeholder="输入数量" value="1">
+                        </div>
+                        <button onclick="adminApp.confirmInventoryIn()" class="w-full px-4 py-2 btn-secondary text-white rounded-lg">确认入库</button>
+                    </div>
+                </div>
+                
+                <div id="inventory-out" class="hidden">
+                    <p class="text-slate-400">出库功能开发中...</p>
+                </div>
+                
+                <div id="inventory-check" class="hidden">
+                    <p class="text-slate-400">盘点功能开发中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Training Push Modal -->
+    <div id="training-modal" class="modal fixed inset-0 bg-black/70 backdrop-blur-sm z-50 items-center justify-center hidden">
+        <div class="glass-card rounded-xl w-full max-w-md mx-4">
+            <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white">推送培训课程</h3>
+                <button onclick="adminApp.closeTrainingModal()" class="text-slate-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="training-form" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">培训名称</label>
+                    <input type="text" id="training-name" class="input-field w-full px-3 py-2 rounded-lg" placeholder="输入培训名称">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">培训类型</label>
+                    <select id="training-type" class="input-field w-full px-3 py-2 rounded-lg">
+                        <option value="technical">技术培训</option>
+                        <option value="safety">安全培训</option>
+                        <option value="management">管理培训</option>
+                        <option value="compliance">合规培训</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">截止日期</label>
+                    <input type="date" id="training-deadline" class="input-field w-full px-3 py-2 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">推送对象</label>
+                    <select id="training-target" class="input-field w-full px-3 py-2 rounded-lg">
+                        <option value="all">全体员工</option>
+                        <option value="dept">指定部门</option>
+                        <option value="user">指定员工</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="adminApp.closeTrainingModal()" class="flex-1 px-4 py-2 border border-white/20 rounded-lg text-slate-400 hover:text-white hover:border-white/40">取消</button>
+                    <button type="submit" class="flex-1 px-4 py-2 btn-primary text-white rounded-lg">推送</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        // Supabase Configuration - 与登录页保持一致
+        const SUPABASE_URL = 'https://dlwypgzfoldhzajbnaxv.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_jU_gprs9slrLe2o-GS1T-g_4kNreKy3';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Admin Application Class
+        class AdminApp {
+            constructor() {
+                this.currentUser = null;
+                this.userProfile = null;
+                this.isAdmin = false;
+                
+                // 初始化数据
+                this.users = [];
+                this.overtimeData = [];
+                this.projects = [];
+                this.materials = [];
+                this.materialApprovals = [];
+                this.trainings = [];
+                this.alerts = [];
+                
+                this.deptOvertimeChart = null;
+                this.taskStatusChart = null;
+                this.allOvertimeChart = null;
+                
+                this.init();
+            }
+            
+            async init() {
+                // 首先检查权限
+                const hasPermission = await this.checkAuth();
+                
+                if (!hasPermission) {
+                    // 显示无权限页面
+                    document.getElementById('permission-denied').classList.remove('hidden');
+                    return;
+                }
+                
+                // 有权限，显示管理界面
+                document.getElementById('admin-interface').classList.remove('hidden');
+                
+                this.updateTime();
+                setInterval(() => this.updateTime(), 1000);
+                
+                // 加载所有数据
+                await this.loadAllData();
+                
+                this.renderDashboard();
+                this.renderUsers();
+                this.renderOvertimeAdmin();
+                this.renderProjects();
+                this.renderMaterialsAdmin();
+                this.renderTraining();
+                this.initCharts();
+                this.setupEventListeners();
+            }
+            
+            // 检查认证和权限 - 关键方法
+            async checkAuth() {
+                try {
+                    const { data: { session }, error } = await supabaseClient.auth.getSession();
+                    
+                    if (error || !session) {
+                        // 未登录，跳转到登录页
+                        window.location.href = '../../index.html';
+                        return false;
+                    }
+                    
+                    this.currentUser = session.user;
+                    
+                    // 查询用户角色
+                    const { data: profile, error: profileError } = await supabaseClient
+                        .from('user_profiles')
+                        .select('*')
+                        .eq('id', this.currentUser.id)
+                        .single();
+                    
+                    if (profileError) {
+                        console.error('获取用户资料失败:', profileError);
+                        // 检查是否是管理员邮箱（兜底方案）
+                        if (this.currentUser.email === 'lishu1226@163.com') {
+                            this.isAdmin = true;
+                            this.userProfile = {
+                                role: 'admin',
+                                name: this.currentUser.email.split('@')[0],
+                                permissions: { overtime: true, project: true, material: true, training: true }
+                            };
+                            return true;
+                        }
+                        return false;
+                    }
+                    
+                    this.userProfile = profile;
+                    
+                    // 验证是否为管理员
+                    if (profile.role !== 'admin') {
+                        console.log('非管理员用户尝试访问管理页面');
+                        this.isAdmin = false;
+                        return false;
+                    }
+                    
+                    this.isAdmin = true;
+                    return true;
+                    
+                } catch (err) {
+                    console.error('认证检查失败:', err);
+                    return false;
+                }
+            }
+            
+            // 跳转到用户页面
+            goToUserPage() {
+                window.location.href = '../user/index.html';
+            }
+            
+            // 加载所有数据
+            async loadAllData() {
+                // 加载所有用户
+                const { data: users } = await supabaseClient
+                    .from('user_profiles')
+                    .select('*');
+                this.users = users || this.getDefaultUsers();
+                
+                // 加载所有加班记录
+                const { data: overtime } = await supabaseClient
+                    .from('overtime_records')
+                    .select('*');
+                this.overtimeData = overtime || this.getDefaultOvertimeData();
+                
+                // 加载所有项目
+                const { data: projects } = await supabaseClient
+                    .from('tasks')
+                    .select('*');
+                this.projects = projects || this.getDefaultProjects();
+                
+                // 加载所有物料
+                const { data: materials } = await supabaseClient
+                    .from('materials')
+                    .select('*');
+                this.materials = materials || this.getDefaultMaterials();
+                
+                // 加载培训数据
+                this.trainings = this.getDefaultTrainings();
+                this.alerts = this.getDefaultAlerts();
+                this.materialApprovals = this.getDefaultMaterialApprovals();
+            }
+            
+            getDefaultUsers() {
+                return [
+                    { id: '1', name: '张三', email: 'zhangsan@example.com', employee_no: 'EMP2021001', department: '自动化测试部', position: '高级测试工程师', role: 'user', join_date: '2021-03-15', permissions: { overtime: true, project: true, material: false, training: false } },
+                    { id: '2', name: '李四', email: 'lisi@example.com', employee_no: 'EMP2021002', department: '研发部', position: '开发工程师', role: 'user', join_date: '2021-06-20', permissions: { overtime: true, project: true, material: true, training: false } },
+                    { id: '3', name: '王五', email: 'wangwu@example.com', employee_no: 'EMP2021003', department: '自动化测试部', position: '测试工程师', role: 'user', join_date: '2022-01-10', permissions: { overtime: true, project: false, material: false, training: false } },
+                    { id: '4', name: '赵六', email: 'zhaoliu@example.com', employee_no: 'EMP2020001', department: '质量保证部', position: '质量经理', role: 'admin', join_date: '2020-08-05', permissions: { overtime: true, project: true, material: true, training: true } }
+                ];
+            }
+            
+            getDefaultOvertimeData() {
+                return [
+                    { employee_id: '1', name: '张三', department: '自动化测试部', month_hours: 45, year_hours: 320, status: 'normal' },
+                    { employee_id: '2', name: '李四', department: '研发部', month_hours: 38, year_hours: 280, status: 'normal' },
+                    { employee_id: '3', name: '王五', department: '自动化测试部', month_hours: 52, year_hours: 350, status: 'warning' },
+                    { employee_id: '4', name: '赵六', department: '质量保证部', month_hours: 30, year_hours: 220, status: 'normal' },
+                    { employee_id: '5', name: '钱七', department: '自动化测试部', month_hours: 65, year_hours: 480, status: 'danger' }
+                ];
+            }
+            
+            getDefaultProjects() {
+                return [
+                    { id: 1, name: '项目A', function: '登录模块', case_total: 150, case_completed: 145, auto_rate: 85, status: 'progress', owner: '张三' },
+                    { id: 2, name: '项目A', function: '支付模块', case_total: 200, case_completed: 180, auto_rate: 90, status: 'progress', owner: '李四' },
+                    { id: 3, name: '项目B', function: '订单模块', case_total: 120, case_completed: 120, auto_rate: 100, status: 'completed', owner: '王五' },
+                    { id: 4, name: '项目C', function: '用户中心', case_total: 80, case_completed: 40, auto_rate: 60, status: 'progress', owner: '赵六' }
+                ];
+            }
+            
+            getDefaultMaterials() {
+                return [
+                    { id: 1, name: 'MacBook Pro M2', code: 'LAP-001', user: '张三', borrow_date: '2024-01-01', return_date: '2024-06-01', status: 'out' },
+                    { id: 2, name: 'Dell显示器 27寸', code: 'MON-003', user: '李四', borrow_date: '2023-12-15', return_date: '2024-03-15', status: 'out' },
+                    { id: 3, name: '测试设备A', code: 'DEV-001', user: null, borrow_date: null, return_date: null, status: 'in' },
+                    { id: 4, name: '机械键盘', code: 'KEY-012', user: '王五', borrow_date: '2023-11-01', return_date: '2023-11-30', status: 'maintenance' }
+                ];
+            }
+            
+            getDefaultTrainings() {
+                return [
+                    { id: 1, name: '自动化测试框架培训', type: 'technical', deadline: '2024-02-15', target: 'all', total: 20, completed: 15 },
+                    { id: 2, name: '信息安全意识培训', type: 'safety', deadline: '2024-01-30', target: 'all', total: 20, completed: 18 },
+                    { id: 3, name: '敏捷开发流程培训', type: 'management', deadline: '2024-03-01', target: 'dept', total: 8, completed: 5 }
+                ];
+            }
+            
+            getDefaultAlerts() {
+                return [
+                    { level: 'high', title: '加班异常', message: '钱七本月加班65小时，超过阈值', time: '2小时前' },
+                    { level: 'medium', title: '物料归还提醒', message: '李四的显示器即将到期', time: '1天前' },
+                    { level: 'medium', title: '培训未完成', message: '5人未完成安全培训', time: '2天前' },
+                    { level: 'low', title: '设备维护', message: '测试设备A需要定期维护', time: '3天前' }
+                ];
+            }
+            
+            getDefaultMaterialApprovals() {
+                return [
+                    { id: 1, user: '钱七', material: 'MacBook Air', reason: '新员工入职配置', date: '2024-01-20' },
+                    { id: 2, user: '孙八', material: '显示器支架', reason: '改善办公环境', date: '2024-01-19' }
+                ];
+            }
+            
+            updateTime() {
+                const now = new Date();
+                document.getElementById('current-time').textContent = now.toLocaleString('zh-CN');
+            }
+            
+            initCharts() {
+                // Department Overtime Chart
+                const ctx1 = document.getElementById('deptOvertimeChart').getContext('2d');
+                this.deptOvertimeChart = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: ['自动化测试部', '研发部', '质量保证部', '产品部'],
+                        datasets: [{
+                            label: '本月加班时长',
+                            data: [142, 98, 65, 45],
+                            backgroundColor: ['rgba(139, 92, 246, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(236, 72, 153, 0.8)'],
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { 
+                                beginAtZero: true,
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        }
+                    }
+                });
+                
+                // Task Status Chart
+                const ctx2 = document.getElementById('taskStatusChart').getContext('2d');
+                this.taskStatusChart = new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['已完成', '进行中', '待处理', '阻塞中'],
+                        datasets: [{
+                            data: [45, 30, 20, 5],
+                            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#94a3b8' }
+                            }
+                        }
+                    }
+                });
+                
+                // All Overtime Chart
+                const ctx3 = document.getElementById('allOvertimeChart').getContext('2d');
+                this.allOvertimeChart = new Chart(ctx3, {
+                    type: 'line',
+                    data: {
+                        labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                        datasets: [{
+                            label: '总加班时长',
+                            data: [320, 280, 350, 300, 380, 340],
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#94a3b8' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: {
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            renderDashboard() {
+                // KPI Cards
+                document.getElementById('total-employees').textContent = this.users.length;
+                
+                const totalOt = this.overtimeData.reduce((sum, o) => sum + (o.month_hours || 0), 0);
+                document.getElementById('total-overtime').textContent = totalOt + 'h';
+                
+                const completedCases = this.projects.reduce((sum, p) => sum + (p.case_completed || 0), 0);
+                const totalCases = this.projects.reduce((sum, p) => sum + (p.case_total || 0), 0);
+                const completionRate = totalCases > 0 ? Math.round(completedCases / totalCases * 100) : 0;
+                document.getElementById('task-completion').textContent = completionRate + '%';
+                
+                const autoCases = this.projects.reduce((sum, p) => sum + Math.floor((p.case_completed || 0) * (p.auto_rate || 0) / 100), 0);
+                const autoRate = completedCases > 0 ? Math.round(autoCases / completedCases * 100) : 0;
+                document.getElementById('auto-coverage').textContent = autoRate + '%';
+                
+                // Alerts
+                document.getElementById('alert-count').textContent = this.alerts.length + ' 个预警';
+                const alertHtml = this.alerts.map(a => `
+                    <div class="alert-card ${this.getAlertClass(a.level)} rounded-lg p-4">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-${this.getAlertIcon(a.level)} text-${this.getAlertColor(a.level)}-400 mt-1"></i>
+                            <div class="flex-1">
+                                <h4 class="font-medium text-white">${a.title}</h4>
+                                <p class="text-sm text-slate-400 mt-1">${a.message}</p>
+                                <p class="text-xs text-slate-500 mt-2">${a.time}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('alert-list').innerHTML = alertHtml;
+                
+                // Online users
+                const onlineHtml = this.users.slice(0, 4).map(u => `
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-600 text-white flex items-center justify-center text-xs font-bold border-2 border-slate-800">
+                        ${u.name ? u.name.charAt(0) : 'U'}
+                    </div>
+                `).join('');
+                document.getElementById('online-users').innerHTML = onlineHtml;
+                document.getElementById('online-count').textContent = '4 人在线';
+                
+                // Equipment status
+                const equipmentHtml = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-slate-300">测试服务器A</span>
+                        <span class="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded">运行中</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-slate-300">测试服务器B</span>
+                        <span class="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded">运行中</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-slate-300">自动化执行机</span>
+                        <span class="text-xs px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded">维护中</span>
+                    </div>
+                `;
+                document.getElementById('equipment-status').innerHTML = equipmentHtml;
+                
+                // Pending approvals
+                const pendingHtml = `
+                    <li class="flex items-center justify-between">
+                        <span class="text-slate-300">物料申请 (2)</span>
+                        <button onclick="adminApp.switchSection('materials')" class="text-purple-400 text-xs hover:underline">查看</button>
+                    </li>
+                    <li class="flex items-center justify-between">
+                        <span class="text-slate-300">加班审批 (3)</span>
+                        <button onclick="adminApp.switchSection('overtime')" class="text-purple-400 text-xs hover:underline">查看</button>
+                    </li>
+                    <li class="flex items-center justify-between">
+                        <span class="text-slate-300">培训完成确认 (5)</span>
+                        <button onclick="adminApp.switchSection('training')" class="text-purple-400 text-xs hover:underline">查看</button>
+                    </li>
+                `;
+                document.getElementById('pending-approvals').innerHTML = pendingHtml;
+            }
+            
+            getAlertClass(level) {
+                return `alert-${level}`;
+            }
+            
+            getAlertIcon(level) {
+                const map = { high: 'exclamation-circle', medium: 'exclamation-triangle', low: 'info-circle' };
+                return map[level];
+            }
+            
+            getAlertColor(level) {
+                const map = { high: 'red', medium: 'yellow', low: 'blue' };
+                return map[level];
+            }
+            
+            renderUsers() {
+                const html = this.users.map(u => {
+                    const years = this.calculateYears(u.join_date);
+                    return `
+                    <tr class="hover:bg-slate-800/30">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-600 text-white flex items-center justify-center font-bold">
+                                    ${u.name ? u.name.charAt(0) : 'U'}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-white">${u.name || '未知'}</p>
+                                    <p class="text-sm text-slate-400">${u.email || ''}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-300">${u.department || '-'}<br><span class="text-slate-500">${u.position || '-'}</span></td>
+                        <td class="px-6 py-4">
+                            <span class="px-3 py-1 rounded-full text-xs ${u.role === 'admin' ? 'bg-purple-500/20 text-purple-400' : 'bg-slate-500/20 text-slate-400'}">
+                                ${u.role === 'admin' ? '管理员' : '普通用户'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-300">${u.join_date || '-'}</td>
+                        <td class="px-6 py-4 text-sm text-slate-300">${years} 年</td>
+                        <td class="px-6 py-4">
+                            <button onclick="adminApp.editUser('${u.id}')" class="text-purple-400 hover:underline text-sm mr-2">编辑权限</button>
+                            <button onclick="adminApp.resetPassword('${u.id}')" class="text-slate-400 hover:underline text-sm">重置密码</button>
+                        </td>
+                    </tr>
+                `}).join('');
+                document.getElementById('users-table').innerHTML = html || '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">暂无用户数据</td></tr>';
+            }
+            
+            calculateYears(joinDate) {
+                if (!joinDate) return 0;
+                const join = new Date(joinDate);
+                const now = new Date();
+                return Math.floor((now - join) / (365.25 * 24 * 60 * 60 * 1000));
+            }
+            
+            renderOvertimeAdmin() {
+                const html = this.overtimeData.map(o => `
+                    <tr class="hover:bg-slate-800/30 ${o.status === 'danger' ? 'bg-red-500/10' : o.status === 'warning' ? 'bg-yellow-500/10' : ''}">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-slate-700 text-white flex items-center justify-center text-sm font-bold">
+                                    ${o.name ? o.name.charAt(0) : 'U'}
+                                </div>
+                                <span class="font-medium text-white">${o.name || '未知'}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-300">${o.department || '-'}</td>
+                        <td class="px-6 py-4 text-sm font-medium ${(o.month_hours || 0) > 50 ? 'text-red-400' : 'text-white'}">${o.month_hours || 0}h</td>
+                        <td class="px-6 py-4 text-sm text-slate-300">${o.year_hours || 0}h</td>
+                        <td class="px-6 py-4">
+                            ${o.status === 'danger' ? '<span class="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs">超标</span>' : 
+                              o.status === 'warning' ? '<span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs">警告</span>' : 
+                              '<span class="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">正常</span>'}
+                        </td>
+                        <td class="px-6 py-4">
+                            <button onclick="adminApp.viewOvertimeDetail('${o.employee_id}')" class="text-purple-400 hover:underline text-sm">详情</button>
+                        </td>
+                    </tr>
+                `).join('');
+                document.getElementById('overtime-table-admin').innerHTML = html || '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">暂无数据</td></tr>';
+            }
+            
+            renderProjects() {
+                // Stats
+                const uniqueProjects = [...new Set(this.projects.map(p => p.name))];
+                document.getElementById('admin-total-projects').textContent = uniqueProjects.length;
+                
+                const totalCases = this.projects.reduce((sum, p) => sum + (p.case_total || 0), 0);
+                document.getElementById('admin-total-cases').textContent = totalCases;
+                
+                const completedCases = this.projects.reduce((sum, p) => sum + (p.case_completed || 0), 0);
+                const completionRate = totalCases > 0 ? Math.round(completedCases / totalCases * 100) : 0;
+                document.getElementById('admin-completion-rate').textContent = completionRate + '%';
+                
+                const autoCases = this.projects.reduce((sum, p) => sum + Math.floor((p.case_completed || 0) * (p.auto_rate || 0) / 100), 0);
+                const autoRate = completedCases > 0 ? Math.round(autoCases / completedCases * 100) : 0;
+                document.getElementById('admin-auto-rate').textContent = autoRate + '%';
+                
+                // Function progress
+                const functions = [...new Set(this.projects.map(p => p.function))];
+                const funcHtml = functions.map(f => {
+                    const funcProjects = this.projects.filter(p => p.function === f);
+                    const total = funcProjects.reduce((sum, p) => sum + (p.case_total || 0), 0);
+                    const completed = funcProjects.reduce((sum, p) => sum +                    (p.case_completed || 0), 0);
+                    const rate = total > 0 ? Math.round(completed / total * 100) : 0;
+                    return `
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-slate-300">${f}</span>
+                                <span class="text-slate-400">${rate}%</span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-2">
+                                <div class="bg-purple-500 h-2 rounded-full progress-bar" style="width: ${rate}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                document.getElementById('function-progress').innerHTML = funcHtml;
+                
+                // Table
+                const html = this.projects.map(p => `
+                    <tr class="hover:bg-slate-800/30">
+                        <td class="px-6 py-4 font-medium text-white">${p.name}</td>
+                        <td class="px-6 py-4 text-sm text-slate-300">${p.function}</td>
+                        <td class="px-6 py-4 text-sm text-slate-300">
+                            <div class="flex items-center gap-2">
+                                <span>${p.case_completed}/${p.case_total}</span>
+                                <div class="w-16 bg-slate-700 rounded-full h-1.5">
+                                    <div class="bg-purple-500 h-1.5 rounded-full" style="width: ${p.case_total > 0 ? (p.case_completed/p.case_total*100) : 0}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-pink-400 font-medium">${p.auto_rate}%</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded text-xs ${p.status === 'completed' ? 'bg-green-500/20 text-green-400' : 'bg-blue-500/20 text-blue-400'}">
+                                ${p.status === 'completed' ? '已完成' : '进行中'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-300">${p.owner}</td>
+                    </tr>
+                `).join('');
+                document.getElementById('projects-table').innerHTML = html || '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">暂无项目数据</td></tr>';
+            }
+            
+            renderMaterialsAdmin() {
+                // Stats
+                const inStock = this.materials.filter(m => m.status === 'in').length;
+                const out = this.materials.filter(m => m.status === 'out').length;
+                const pending = this.materialApprovals.length;
+                const maintenance = this.materials.filter(m => m.status === 'maintenance').length;
+                
+                document.getElementById('material-in').textContent = inStock;
+                document.getElementById('material-out').textContent = out;
+                document.getElementById('material-pending-approval').textContent = pending;
+                document.getElementById('material-maintenance').textContent = maintenance;
+                
+                // Table
+                const html = this.materials.map(m => `
+                    <tr class="hover:bg-slate-800/30">
+                        <td class="px-6 py-4">
+                            <p class="font-medium text-white">${m.name}</p>
+                            <p class="text-sm text-slate-500">${m.code}</p>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-300">${m.user || '-'}</td>
+                        <td class="px-6 py-4 text-sm text-slate-300">${m.borrow_date || '-'}</td>
+                        <td class="px-6 py-4 text-sm ${this.isNearReturn(m.return_date) ? 'text-red-400 font-medium' : 'text-slate-300'}">${m.return_date || '-'}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded text-xs ${this.getMaterialStatusClass(m.status)}">
+                                ${this.getMaterialStatusText(m.status)}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            ${m.status === 'out' ? `<button onclick="adminApp.forceReturn(${m.id})" class="text-purple-400 hover:underline text-sm">强制归还</button>` : '-'}
+                        </td>
+                    </tr>
+                `).join('');
+                document.getElementById('materials-table-admin').innerHTML = html || '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">暂无物料数据</td></tr>';
+                
+                // Approvals
+                const approvalHtml = this.materialApprovals.map(a => `
+                    <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                        <div>
+                            <p class="font-medium text-white">${a.user} - ${a.material}</p>
+                            <p class="text-sm text-slate-400">${a.reason}</p>
+                            <p class="text-xs text-slate-500">${a.date}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="adminApp.approveMaterial(${a.id})" class="px-3 py-1 bg-green-500/20 text-green-400 rounded text-sm hover:bg-green-500/30">批准</button>
+                            <button onclick="adminApp.rejectMaterial(${a.id})" class="px-3 py-1 bg-red-500/20 text-red-400 rounded text-sm hover:bg-red-500/30">拒绝</button>
+                        </div>
+                    </div>
+                `).join('');
+                document.getElementById('material-approvals').innerHTML = approvalHtml || '<p class="text-slate-400 text-sm">暂无待审批申请</p>';
+            }
+            
+            isNearReturn(returnDate) {
+                if (!returnDate) return false;
+                const returnTime = new Date(returnDate).getTime();
+                const now = new Date().getTime();
+                const diffDays = (returnTime - now) / (1000 * 3600 * 24);
+                return diffDays <= 7 && diffDays > 0;
+            }
+            
+            getMaterialStatusClass(status) {
+                const map = { in: 'bg-green-500/20 text-green-400', out: 'bg-blue-500/20 text-blue-400', maintenance: 'bg-yellow-500/20 text-yellow-400' };
+                return map[status] || 'bg-slate-500/20 text-slate-400';
+            }
+            
+            getMaterialStatusText(status) {
+                const map = { in: '在库', out: '借出', maintenance: '维护中' };
+                return map[status] || status;
+            }
+            
+            renderTraining() {
+                // Training list
+                const html = this.trainings.map(t => `
+                    <div class="border border-white/10 rounded-lg p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="font-bold text-white">${t.name}</h4>
+                                <p class="text-sm text-slate-400">类型: ${this.getTrainingTypeText(t.type)} | 截止: ${t.deadline}</p>
+                            </div>
+                            <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs">
+                                ${t.total > 0 ? Math.round(t.completed / t.total * 100) : 0}% 完成
+                            </span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2 mb-3">
+                            <div class="bg-purple-500 h-2 rounded-full" style="width: ${t.total > 0 ? (t.completed / t.total * 100) : 0}%"></div>
+                        </div>
+                        <p class="text-sm text-slate-400">${t.completed}/${t.total} 人已完成</p>
+                    </div>
+                `).join('');
+                document.getElementById('training-list').innerHTML = html || '<p class="text-slate-400 text-center py-8">暂无培训数据</p>';
+                
+                // Status table
+                const statusHtml = this.trainings.map(t => `
+                    <tr class="hover:bg-slate-800/30">
+                        <td class="px-6 py-4 font-medium text-white">${t.name}</td>
+                        <td class="px-6 py-4 text-sm text-slate-300">${t.total}</td>
+                        <td class="px-6 py-4 text-sm text-green-400 font-medium">${t.completed}</td>
+                        <td class="px-6 py-4 text-sm text-slate-300">${t.total > 0 ? Math.round(t.completed / t.total * 100) : 0}%</td>
+                        <td class="px-6 py-4">
+                            <button onclick="adminApp.viewTrainingDetail(${t.id})" class="text-purple-400 hover:underline text-sm">查看详情</button>
+                        </td>
+                    </tr>
+                `).join('');
+                document.getElementById('training-status-table').innerHTML = statusHtml || '<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">暂无数据</td></tr>';
+            }
+            
+            getTrainingTypeText(type) {
+                const map = { technical: '技术培训', safety: '安全培训', management: '管理培训', compliance: '合规培训' };
+                return map[type] || type;
+            }
+            
+            switchSection(section) {
+                document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+                document.getElementById(`section-${section}`).classList.remove('hidden');
+                
+                document.querySelectorAll('.nav-item').forEach(n => {
+                    if (n.dataset.section === section) {
+                        n.classList.add('active');
+                    } else {
+                        n.classList.remove('active');
+                    }
+                });
+                
+                const titles = {
+                    dashboard: '管理仪表板',
+                    users: '用户管理',
+                    overtime: '加班管理',
+                    projects: '项目数据',
+                    materials: '物料管理',
+                    training: '培训管理'
+                };
+                document.getElementById('page-title').textContent = titles[section];
+            }
+            
+            filterUsers() {
+                this.renderUsers();
+            }
+            
+            editUser(userId) {
+                const user = this.users.find(u => u.id === userId);
+                if (!user) return;
+                
+                document.getElementById('edit-user-id').value = userId;
+                document.getElementById('edit-user-name').value = user.name || '';
+                document.getElementById('edit-user-role').value = user.role || 'user';
+                document.getElementById('perm-overtime').checked = user.permissions?.overtime || false;
+                document.getElementById('perm-project').checked = user.permissions?.project || false;
+                document.getElementById('perm-material').checked = user.permissions?.material || false;
+                document.getElementById('perm-training').checked = user.permissions?.training || false;
+                
+                document.getElementById('user-modal').classList.remove('hidden');
+            }
+            
+            closeUserModal() {
+                document.getElementById('user-modal').classList.add('hidden');
+            }
+            
+            async saveUserEdit(e) {
+                e.preventDefault();
+                const userId = document.getElementById('edit-user-id').value;
+                const user = this.users.find(u => u.id === userId);
+                
+                if (user) {
+                    user.role = document.getElementById('edit-user-role').value;
+                    user.permissions = {
+                        overtime: document.getElementById('perm-overtime').checked,
+                        project: document.getElementById('perm-project').checked,
+                        material: document.getElementById('perm-material').checked,
+                        training: document.getElementById('perm-training').checked
+                    };
+                    
+                    // 更新到Supabase
+                    const { error } = await supabaseClient
+                        .from('user_profiles')
+                        .update({ 
+                            role: user.role,
+                            permissions: user.permissions,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', userId);
+                    
+                    if (error) {
+                        console.error('更新用户失败:', error);
+                        alert('更新失败，请重试');
+                        return;
+                    }
+                    
+                    this.renderUsers();
+                    this.closeUserModal();
+                    alert('用户权限更新成功！');
+                }
+            }
+            
+            async resetPassword(userId) {
+                if (confirm('确认重置该用户的密码？')) {
+                    // 调用Supabase重置密码
+                    const { error } = await supabaseClient.auth.admin.resetPasswordForEmail(
+                        this.users.find(u => u.id === userId)?.email || ''
+                    );
+                    
+                    if (error) {
+                        console.error('重置密码失败:', error);
+                        alert('重置失败，请重试');
+                        return;
+                    }
+                    
+                    alert('密码重置成功！新密码已发送至用户邮箱。');
+                }
+            }
+            
+            batchAddUsers() {
+                alert('批量添加用户功能：请上传CSV文件或使用模板');
+            }
+            
+            exportUsers() {
+                // 导出为CSV
+                const headers = ['ID', '姓名', '邮箱', '工号', '部门', '职位', '角色', '入职日期'];
+                const rows = this.users.map(u => [
+                    u.id, u.name, u.email, u.employee_no, u.department, u.position, u.role, u.join_date
+                ]);
+                
+                let csv = headers.join(',') + '\n';
+                rows.forEach(row => {
+                    csv += row.map(cell => `"${cell || ''}"`).join(',') + '\n';
+                });
+                
+                const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `用户列表_${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+            }
+            
+            importOvertime() {
+                document.getElementById('import-modal').classList.remove('hidden');
+                // 初始化Excel网格
+                this.initExcelGrid();
+            }
+            
+            closeImportModal() {
+                document.getElementById('import-modal').classList.add('hidden');
+            }
+            
+            initExcelGrid() {
+                const grid = document.getElementById('excel-grid');
+                // 清空现有内容
+                grid.innerHTML = `
+                    <div class="excel-cell excel-header"></div>
+                    <div class="excel-cell excel-header">姓名</div>
+                    <div class="excel-cell excel-header">工号</div>
+                    <div class="excel-cell excel-header">日期</div>
+                    <div class="excel-cell excel-header">开始时间</div>
+                    <div class="excel-cell excel-header">结束时间</div>
+                    <div class="excel-cell excel-header">类型</div>
+                    <div class="excel-cell excel-header">工作内容</div>
+                `;
+                
+                // 添加10行
+                for (let i = 0; i < 10; i++) {
+                    const rowNum = document.createElement('div');
+                    rowNum.className = 'excel-cell excel-header';
+                    rowNum.textContent = i + 1;
+                    grid.appendChild(rowNum);
+                    
+                    for (let j = 0; j < 7; j++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'excel-cell';
+                        cell.contentEditable = true;
+                        grid.appendChild(cell);
+                    }
+                }
+            }
+            
+            addExcelRow() {
+                const grid = document.getElementById('excel-grid');
+                const rowCount = (grid.children.length - 8) / 8 + 1;
+                
+                const rowNum = document.createElement('div');
+                rowNum.className = 'excel-cell excel-header';
+                rowNum.textContent = rowCount;
+                grid.appendChild(rowNum);
+                
+                for (let j = 0; j < 7; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'excel-cell';
+                    cell.contentEditable = true;
+                    grid.appendChild(cell);
+                }
+            }
+            
+            async confirmImport() {
+                const grid = document.getElementById('excel-grid');
+                const cells = Array.from(grid.querySelectorAll('.excel-cell:not(.excel-header)'));
+                const rows = [];
+                
+                // 解析数据（每行7个单元格）
+                for (let i = 0; i < cells.length; i += 7) {
+                    const row = {
+                        name: cells[i]?.textContent?.trim(),
+                        employee_no: cells[i + 1]?.textContent?.trim(),
+                        date: cells[i + 2]?.textContent?.trim(),
+                        start_time: cells[i + 3]?.textContent?.trim(),
+                        end_time: cells[i + 4]?.textContent?.trim(),
+                        type: cells[i + 5]?.textContent?.trim(),
+                        content: cells[i + 6]?.textContent?.trim()
+                    };
+                    
+                    if (row.name && row.date) {
+                        // 计算工时
+                        if (row.start_time && row.end_time) {
+                            const start = new Date(`2000-01-01 ${row.start_time}`);
+                            const end = new Date(`2000-01-01 ${row.end_time}`);
+                            row.hours = (end - start) / (1000 * 60 * 60);
+                        }
+                        rows.push(row);
+                    }
+                }
+                
+                if (rows.length === 0) {
+                    alert('没有可导入的数据');
+                    return;
+                }
+                
+                // 保存到Supabase
+                const { data, error } = await supabaseClient
+                    .from('overtime_records')
+                    .insert(rows.map(r => ({
+                        ...r,
+                        status: 'approved',
+                        created_at: new Date().toISOString()
+                    })));
+                
+                if (error) {
+                    console.error('导入失败:', error);
+                    alert('导入失败，请检查数据格式');
+                    return;
+                }
+                
+                alert(`成功导入 ${rows.length} 条记录`);
+                this.closeImportModal();
+                await this.loadAllData();
+                this.renderOvertimeAdmin();
+            }
+            
+            exportOvertimeData() {
+                const headers = ['员工', '部门', '日期', '开始时间', '结束时间', '时长', '类型', '工作内容', '状态'];
+                const rows = this.overtimeData.map(o => [
+                    o.name, o.department, o.date, o.start_time, o.end_time, o.hours, 
+                    this.getOtTypeText(o.type), o.content, o.status
+                ]);
+                
+                let csv = headers.join(',') + '\n';
+                rows.forEach(row => {
+                    csv += row.map(cell => `"${cell || ''}"`).join(',') + '\n';
+                });
+                
+                const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `加班数据_${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+            }
+            
+            getOtTypeText(type) {
+                const map = { weekday: '工作日', weekend: '周末', holiday: '节假日' };
+                return map[type] || type;
+            }
+            
+            checkOvertimeAnomaly() {
+                const threshold = 50; // 50小时阈值
+                const anomalies = this.overtimeData.filter(o => (o.month_hours || 0) > threshold);
+                
+                if (anomalies.length > 0) {
+                    alert(`检测到 ${anomalies.length} 人加班超过${threshold}小时：\n${anomalies.map(o => `${o.name}: ${o.month_hours}h`).join('\n')}`);
+                } else {
+                    alert('未发现加班异常');
+                }
+            }
+            
+            viewOvertimeDetail(employeeId) {
+                const data = this.overtimeData.find(o => o.employee_id === employeeId);
+                if (data) {
+                    alert(`员工: ${data.name}\n本月加班: ${data.month_hours}h\n本年累计: ${data.year_hours}h\n状态: ${data.status}`);
+                }
+            }
+            
+            filterProjects() {
+                this.renderProjects();
+            }
+            
+            openInventoryModal() {
+                document.getElementById('inventory-modal').classList.remove('hidden');
+            }
+            
+            closeInventoryModal() {
+                document.getElementById('inventory-modal').classList.add('hidden');
+            }
+            
+            switchInventoryTab(tab) {
+                ['in', 'out', 'check'].forEach(t => {
+                    const btn = document.getElementById(`tab-${t}`);
+                    const content = document.getElementById(`inventory-${t}`);
+                    
+                    if (t === tab) {
+                        btn.classList.add('bg-purple-500/20', 'text-purple-400');
+                        btn.classList.remove('text-slate-400', 'hover:bg-white/10');
+                        content.classList.remove('hidden');
+                    } else {
+                        btn.classList.remove('bg-purple-500/20', 'text-purple-400');
+                        btn.classList.add('text-slate-400', 'hover:bg-white/10');
+                        content.classList.add('hidden');
+                    }
+                });
+            }
+            
+            async confirmInventoryIn() {
+                const name = document.getElementById('inv-name').value;
+                const code = document.getElementById('inv-code').value;
+                const qty = parseInt(document.getElementById('inv-qty').value) || 1;
+                
+                if (!name || !code) {
+                    alert('请填写物料名称和编号');
+                    return;
+                }
+                
+                // 保存到Supabase
+                const newMaterials = [];
+                for (let i = 0; i < qty; i++) {
+                    newMaterials.push({
+                        name,
+                        code: qty > 1 ? `${code}-${String(i + 1).padStart(3, '0')}` : code,
+                        status: 'in',
+                        created_at: new Date().toISOString()
+                    });
+                }
+                
+                const { error } = await supabaseClient
+                    .from('materials')
+                    .insert(newMaterials);
+                
+                if (error) {
+                    console.error('入库失败:', error);
+                    alert('入库失败，请重试');
+                    return;
+                }
+                
+                alert(`成功入库 ${qty} 件 ${name}`);
+                this.closeInventoryModal();
+                await this.loadAllData();
+                this.renderMaterialsAdmin();
+            }
+            
+            async forceReturn(materialId) {
+                if (confirm('确认强制归还该物料？')) {
+                    const material = this.materials.find(m => m.id === materialId);
+                    if (material) {
+                        const { error } = await supabaseClient
+                            .from('materials')
+                            .update({ 
+                                status: 'in',
+                                user: null,
+                                borrow_date: null,
+                                return_date: null,
+                                actual_return_date: new Date().toISOString().split('T')[0],
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('id', materialId);
+                        
+                        if (error) {
+                            console.error('强制归还失败:', error);
+                            alert('操作失败，请重试');
+                            return;
+                        }
+                        
+                        material.status = 'in';
+                        material.user = null;
+                        this.renderMaterialsAdmin();
+                        alert('强制归还成功！');
+                    }
+                }
+            }
+            
+            async approveMaterial(approvalId) {
+                const approval = this.materialApprovals.find(a => a.id === approvalId);
+                if (approval) {
+                    // 创建新的物料记录
+                    const { error } = await supabaseClient
+                        .from('materials')
+                        .insert([{
+                            name: approval.material,
+                            user: approval.user,
+                            status: 'out',
+                            borrow_date: new Date().toISOString().split('T')[0],
+                            created_at: new Date().toISOString()
+                        }]);
+                    
+                    if (error) {
+                        console.error('批准失败:', error);
+                        alert('批准失败，请重试');
+                        return;
+                    }
+                    
+                    this.materialApprovals = this.materialApprovals.filter(a => a.id !== approvalId);
+                    this.renderMaterialsAdmin();
+                    alert('已批准该物料申请！');
+                }
+            }
+            
+            rejectMaterial(approvalId) {
+                if (confirm('确认拒绝该申请？')) {
+                    this.materialApprovals = this.materialApprovals.filter(a => a.id !== approvalId);
+                    this.renderMaterialsAdmin();
+                    alert('已拒绝该物料申请！');
+                }
+            }
+            
+            pushTraining() {
+                document.getElementById('training-modal').classList.remove('hidden');
+                document.getElementById('training-deadline').value = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            }
+            
+            closeTrainingModal() {
+                document.getElementById('training-modal').classList.add('hidden');
+            }
+            
+            async saveTraining(e) {
+                e.preventDefault();
+                const newTraining = {
+                    name: document.getElementById('training-name').value,
+                    type: document.getElementById('training-type').value,
+                    deadline: document.getElementById('training-deadline').value,
+                    target: document.getElementById('training-target').value,
+                    total: this.users.length,
+                    completed: 0,
+                    created_at: new Date().toISOString()
+                };
+                
+                // 保存到Supabase
+                const { data, error } = await supabaseClient
+                    .from('trainings')
+                    .insert([newTraining])
+                    .select();
+                
+                if (error) {
+                    console.error('推送培训失败:', error);
+                    alert('推送失败，请重试');
+                    return;
+                }
+                
+                if (data && data[0]) {
+                    this.trainings.push(data[0]);
+                } else {
+                    newTraining.id = Date.now();
+                    this.trainings.push(newTraining);
+                }
+                
+                this.renderTraining();
+                this.closeTrainingModal();
+                document.getElementById('training-form').reset();
+                alert('培训推送成功！');
+            }
+            
+            viewTrainingDetail(trainingId) {
+                const training = this.trainings.find(t => t.id === trainingId);
+                if (training) {
+                    alert(`培训: ${training.name}\n完成率: ${training.total > 0 ? Math.round(training.completed / training.total * 100) : 0}%\n未完成: ${training.total - training.completed}人`);
+                }
+            }
+            
+            async refreshData() {
+                await this.loadAllData();
+                this.renderDashboard();
+                this.renderUsers();
+                this.renderOvertimeAdmin();
+                this.renderProjects();
+                this.renderMaterialsAdmin();
+                this.renderTraining();
+                alert('数据已刷新');
+            }
+            
+            async logout() {
+                if (confirm('确认退出登录？')) {
+                    const { error } = await supabaseClient.auth.signOut();
+                    if (error) {
+                        console.error('退出失败:', error);
+                    }
+                    window.location.href = '../../index.html';
+                }
+            }
+            
+            setupEventListeners() {
+                document.getElementById('user-edit-form').addEventListener('submit', (e) => this.saveUserEdit(e));
+                document.getElementById('training-form').addEventListener('submit', (e) => this.saveTraining(e));
+            }
+        }
+        
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            window.adminApp = new AdminApp('dashboard');
+            window.adminApp = new AdminApp();
         });
     </script>
 </body>
