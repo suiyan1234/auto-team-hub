@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - Auto Team Hub</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0f1c 0%, #1a1f3a 100%);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .glass-card {
+            background: rgba(21, 27, 46, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+        }
+        .input-field {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+        }
+        .robot-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-gradient-to-br from-blue-600 via-cyan-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg robot-float">
+                <i class="fas fa-robot text-white text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-white tracking-tight">Auto Team Hub</h1>
+            <p class="text-slate-400 mt-2 text-sm">综合测试自动化中心</p>
+        </div>
+        
+        <div class="glass-card p-8">
+            <h2 class="text-xl font-semibold text-white mb-6 text-center">欢迎回来</h2>
+            
+            <form id="loginForm" class="space-y-5">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">邮箱地址</label>
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        <input type="email" id="email" required class="input-field w-full pl-10 pr-4 py-3 rounded-lg text-white" placeholder="your.email@company.com">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">密码</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        <input type="password" id="password" required class="input-field w-full pl-10 pr-10 py-3 rounded-lg text-white" placeholder="••••••••">
+                    </div>
+                </div>
+                
+                <button type="submit" id="submitBtn" class="btn-primary w-full py-3 rounded-lg text-white font-medium flex items-center justify-center space-x-2">
+                    <span>登 录</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+            
+            <div id="errorMsg" class="hidden mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm text-center"></div>
+        </div>
+    </div>
+
+    <script>
+        // 1. 初始化 Supabase (改用 supabaseClient 避开命名冲突)
+        const SUPABASE_URL = 'https://dlwypgzfoldhzajbnaxv.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_jU_gprs9slrLe2o-GS1T-g_4kNreKy3';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // 2. 登录处理
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // 核心：阻止页面刷新
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // 重置 UI
+            errorMsg.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 验证中...';
+            
+            try {
+                // 执行认证
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) throw error;
+
+                console.log("认证成功，正在检查角色...");
+
+                // 查询角色 (确保你已将 user_roles 改名为 user_profiles)
+                const { data: profile, error: profileError } = await supabaseClient
+                    .from('user_profiles')
+                    .select('role')
+                    .eq('id', data.user.id)
+                    .single();
+
+                // 如果没查到 profile，使用邮箱硬判定作为兜底
+                let userRole = profile?.role;
+                if (!userRole && email === 'lishu1226@163.com') {
+                    userRole = 'admin';
+                }
+
+                // 根据角色跳转 (相对路径匹配图 1)
+                if (userRole === 'admin') {
+                    window.location.href = './public/admin/index.html';
+                } else {
+                    window.location.href = './public/user/index.html';
+                }
+                
+            } catch (err) {
+                console.error("登录出错:", err.message);
+                errorMsg.textContent = err.message === 'Invalid login credentials' ? '邮箱或密码错误' : err.message;
+                errorMsg.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>登 录</span><i class="fas fa-arrow-right"></i>';
+            }
+        });
+    </script>
+</body>
+</html>
