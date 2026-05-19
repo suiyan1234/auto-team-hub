@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="../shared/css/main.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<base target="_blank">
 </head>
 <body class="bg-gray-50 text-gray-800">
     <div class="flex h-screen overflow-hidden">
@@ -47,7 +48,7 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="text-gray-600">Case完成</span>
-                                    <span class="font-medium" id="software-completed">0/0</span>
+                                    <span class="font-medium" id="software-completed" data-stat="software_completed">0/0</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div id="software-progress" class="bg-blue-500 h-2 rounded-full progress-bar" style="width: 0%"></div>
@@ -56,7 +57,7 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="text-gray-600">自动化率</span>
-                                    <span class="font-medium text-purple-600" id="software-auto-rate">0%</span>
+                                    <span class="font-medium text-purple-600" id="software-auto-rate" data-stat="software_auto_rate">0%</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div id="software-auto-progress" class="bg-purple-500 h-2 rounded-full progress-bar" style="width: 0%"></div>
@@ -64,8 +65,8 @@
                             </div>
                         </div>
                         <div class="mt-4 pt-3 border-t flex justify-between text-xs text-gray-500">
-                            <span>自动化: <strong class="text-purple-600" id="software-auto-count">0</strong></span>
-                            <span>剩余: <strong class="text-orange-600" id="software-remaining">0</strong></span>
+                            <span>自动化: <strong class="text-purple-600" id="software-auto-count" data-stat="software_auto_count">0</strong></span>
+                            <span>剩余: <strong class="text-orange-600" id="software-remaining" data-stat="software_remaining">0</strong></span>
                         </div>
                     </div>
 
@@ -84,7 +85,7 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="text-gray-600">Case完成</span>
-                                    <span class="font-medium" id="hardware-completed">0/0</span>
+                                    <span class="font-medium" id="hardware-completed" data-stat="hardware_completed">0/0</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div id="hardware-progress" class="bg-green-500 h-2 rounded-full progress-bar" style="width: 0%"></div>
@@ -93,7 +94,7 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="text-gray-600">自动化率</span>
-                                    <span class="font-medium text-purple-600" id="hardware-auto-rate">0%</span>
+                                    <span class="font-medium text-purple-600" id="hardware-auto-rate" data-stat="hardware_auto_rate">0%</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div id="hardware-auto-progress" class="bg-purple-500 h-2 rounded-full progress-bar" style="width: 0%"></div>
@@ -101,8 +102,8 @@
                             </div>
                         </div>
                         <div class="mt-4 pt-3 border-t flex justify-between text-xs text-gray-500">
-                            <span>自动化: <strong class="text-purple-600" id="hardware-auto-count">0</strong></span>
-                            <span>剩余: <strong class="text-orange-600" id="hardware-remaining">0</strong></span>
+                            <span>自动化: <strong class="text-purple-600" id="hardware-auto-count" data-stat="hardware_auto_count">0</strong></span>
+                            <span>剩余: <strong class="text-orange-600" id="hardware-remaining" data-stat="hardware_remaining">0</strong></span>
                         </div>
                     </div>
 
@@ -121,7 +122,7 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="text-gray-600">Case完成</span>
-                                    <span class="font-medium" id="automation-completed">0/0</span>
+                                    <span class="font-medium" id="automation-completed" data-stat="automation_completed">0/0</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div id="automation-progress" class="bg-purple-500 h-2 rounded-full progress-bar" style="width: 0%"></div>
@@ -130,7 +131,7 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="text-gray-600">自动化率</span>
-                                    <span class="font-medium text-purple-600" id="automation-auto-rate">0%</span>
+                                    <span class="font-medium text-purple-600" id="automation-auto-rate" data-stat="automation_auto_rate">0%</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div id="automation-auto-progress" class="bg-purple-500 h-2 rounded-full progress-bar" style="width: 0%"></div>
@@ -138,8 +139,8 @@
                             </div>
                         </div>
                         <div class="mt-4 pt-3 border-t flex justify-between text-xs text-gray-500">
-                            <span>自动化: <strong class="text-purple-600" id="automation-auto-count">0</strong></span>
-                            <span>剩余: <strong class="text-orange-600" id="automation-remaining">0</strong></span>
+                            <span>自动化: <strong class="text-purple-600" id="automation-auto-count" data-stat="automation_auto_count">0</strong></span>
+                            <span>剩余: <strong class="text-orange-600" id="automation-remaining" data-stat="automation_remaining">0</strong></span>
                         </div>
                     </div>
 
@@ -158,7 +159,7 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="text-gray-600">Case完成</span>
-                                    <span class="font-medium" id="mechanical-completed">0/0</span>
+                                    <span class="font-medium" id="mechanical-completed" data-stat="mechanical_completed">0/0</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div id="mechanical-progress" class="bg-orange-500 h-2 rounded-full progress-bar" style="width: 0%"></div>
@@ -167,7 +168,7 @@
                             <div>
                                 <div class="flex justify-between text-sm mb-1">
                                     <span class="text-gray-600">自动化率</span>
-                                    <span class="font-medium text-purple-600" id="mechanical-auto-rate">0%</span>
+                                    <span class="font-medium text-purple-600" id="mechanical-auto-rate" data-stat="mechanical_auto_rate">0%</span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div id="mechanical-auto-progress" class="bg-purple-500 h-2 rounded-full progress-bar" style="width: 0%"></div>
@@ -175,8 +176,8 @@
                             </div>
                         </div>
                         <div class="mt-4 pt-3 border-t flex justify-between text-xs text-gray-500">
-                            <span>自动化: <strong class="text-purple-600" id="mechanical-auto-count">0</strong></span>
-                            <span>剩余: <strong class="text-orange-600" id="mechanical-remaining">0</strong></span>
+                            <span>自动化: <strong class="text-purple-600" id="mechanical-auto-count" data-stat="mechanical_auto_count">0</strong></span>
+                            <span>剩余: <strong class="text-orange-600" id="mechanical-remaining" data-stat="mechanical_remaining">0</strong></span>
                         </div>
                     </div>
                 </div>
@@ -219,7 +220,7 @@
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                     <div class="px-6 py-4 border-b flex justify-between items-center">
                         <h3 class="text-lg font-bold text-gray-800">Test Case列表</h3>
-                        <span class="text-sm text-gray-500" id="case-total-count">共 0 个Case</span>
+                        <span class="text-sm text-gray-500" id="case-total-count" data-stat="case_total_count">共 0 个Case</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full">
