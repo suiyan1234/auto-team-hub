@@ -163,6 +163,7 @@
             background: rgba(59, 130, 246, 0.8);
         }
     </style>
+<base target="_blank">
 </head>
 <body class="flex h-screen overflow-hidden">
     <!-- Sidebar -->
@@ -242,7 +243,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-slate-400 mb-1">本月加班</p>
-                                <h3 class="text-2xl font-bold text-white" id="user-month-ot">0h</h3>
+                                <h3 class="text-2xl font-bold text-white" id="user-month-ot" data-stat="month_overtime">0h</h3>
                                 <p class="text-xs text-slate-500 mt-1">目标: 40h</p>
                             </div>
                             <div class="p-3 bg-blue-500/20 rounded-lg">
@@ -258,7 +259,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-slate-400 mb-1">任务完成</p>
-                                <h3 class="text-2xl font-bold text-white" id="user-tasks-completed">0/0</h3>
+                                <h3 class="text-2xl font-bold text-white" id="user-tasks-completed" data-stat="task_completed">0/0</h3>
                                 <p class="text-xs text-green-400 mt-1" id="user-task-rate">0%</p>
                             </div>
                             <div class="p-3 bg-green-500/20 rounded-lg">
@@ -271,7 +272,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-slate-400 mb-1">自动化贡献</p>
-                                <h3 class="text-2xl font-bold text-white" id="user-auto-cases">0</h3>
+                                <h3 class="text-2xl font-bold text-white" id="user-auto-cases" data-stat="auto_cases">0</h3>
                                 <p class="text-xs text-purple-400 mt-1">case自动化</p>
                             </div>
                             <div class="p-3 bg-purple-500/20 rounded-lg">
@@ -284,8 +285,8 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-slate-400 mb-1">当前状态</p>
-                                <h3 class="text-2xl font-bold text-white" id="user-status">空闲</h3>
-                                <p class="text-xs text-slate-400 mt-1" id="user-current-task">无进行任务</p>
+                                <h3 class="text-2xl font-bold text-white" id="user-status" data-field="status">空闲</h3>
+                                <p class="text-xs text-slate-400 mt-1" id="user-current-task" data-field="current_task">无进行任务</p>
                             </div>
                             <div class="p-3 bg-orange-500/20 rounded-lg">
                                 <i class="fas fa-user-circle text-orange-400 text-xl"></i>
@@ -319,12 +320,12 @@
                     </div>
                     <div class="glass-card rounded-xl p-6">
                         <h4 class="font-bold text-white mb-4">我的物料</h4>
-                        <p class="text-sm text-slate-400 mb-3">使用中: <span id="dashboard-materials" class="text-white font-bold">0</span> 件</p>
+                        <p class="text-sm text-slate-400 mb-3">使用中: <span id="dashboard-materials" class="text-white font-bold" data-stat="dashboard_materials">0</span> 件</p>
                         <button onclick="userApp.switchSection('materials')" class="text-blue-400 text-sm hover:underline">查看详情</button>
                     </div>
                     <div class="glass-card rounded-xl p-6">
                         <h4 class="font-bold text-white mb-4">待办任务</h4>
-                        <p class="text-sm text-slate-400 mb-3"><span id="dashboard-pending" class="text-white font-bold">0</span> 个待处理</p>
+                        <p class="text-sm text-slate-400 mb-3"><span id="dashboard-pending" class="text-white font-bold" data-stat="dashboard_pending">0</span> 个待处理</p>
                         <button onclick="userApp.switchSection('tasks')" class="text-blue-400 text-sm hover:underline">查看详情</button>
                     </div>
                 </div>
@@ -356,19 +357,19 @@
                     <!-- Task Stats -->
                     <div class="grid grid-cols-4 gap-4 mb-6">
                         <div class="text-center p-3 bg-slate-800 rounded-lg">
-                            <p class="text-2xl font-bold text-white" id="task-total">0</p>
+                            <p class="text-2xl font-bold text-white" id="task-total" data-stat="total_tasks">0</p>
                             <p class="text-xs text-slate-400">总任务</p>
                         </div>
                         <div class="text-center p-3 bg-yellow-500/10 rounded-lg">
-                            <p class="text-2xl font-bold text-yellow-400" id="task-pending">0</p>
+                            <p class="text-2xl font-bold text-yellow-400" id="task-pending" data-stat="pending_tasks">0</p>
                             <p class="text-xs text-slate-400">待处理</p>
                         </div>
                         <div class="text-center p-3 bg-blue-500/10 rounded-lg">
-                            <p class="text-2xl font-bold text-blue-400" id="task-progress">0</p>
+                            <p class="text-2xl font-bold text-blue-400" id="task-progress" data-stat="progress_tasks">0</p>
                             <p class="text-xs text-slate-400">进行中</p>
                         </div>
                         <div class="text-center p-3 bg-green-500/10 rounded-lg">
-                            <p class="text-2xl font-bold text-green-400" id="task-completed">0</p>
+                            <p class="text-2xl font-bold text-green-400" id="task-completed" data-stat="completed_tasks">0</p>
                             <p class="text-xs text-slate-400">已完成</p>
                         </div>
                     </div>
@@ -421,15 +422,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="stat-card rounded-xl p-6">
                         <h4 class="text-sm text-slate-400 mb-2">本周加班</h4>
-                        <p class="text-3xl font-bold text-blue-400" id="week-ot-hours">0h</p>
+                        <p class="text-3xl font-bold text-blue-400" id="week-ot-hours" data-stat="week_overtime">0h</p>
                     </div>
                     <div class="stat-card rounded-xl p-6">
                         <h4 class="text-sm text-slate-400 mb-2">本月加班</h4>
-                        <p class="text-3xl font-bold text-green-400" id="month-ot-hours">0h</p>
+                        <p class="text-3xl font-bold text-green-400" id="month-ot-hours" data-stat="month_overtime_detail">0h</p>
                     </div>
                     <div class="stat-card rounded-xl p-6">
                         <h4 class="text-sm text-slate-400 mb-2">本年累计</h4>
-                        <p class="text-3xl font-bold text-purple-400" id="year-ot-hours">0h</p>
+                        <p class="text-3xl font-bold text-purple-400" id="year-ot-hours" data-stat="year_overtime">0h</p>
                     </div>
                 </div>
 
@@ -477,15 +478,15 @@
                     <!-- Material Stats -->
                     <div class="grid grid-cols-3 gap-4 mb-6">
                         <div class="text-center p-4 bg-blue-500/10 rounded-lg">
-                            <p class="text-2xl font-bold text-blue-400" id="material-using">0</p>
+                            <p class="text-2xl font-bold text-blue-400" id="material-using" data-stat="using_items">0</p>
                             <p class="text-sm text-slate-400">使用中</p>
                         </div>
                         <div class="text-center p-4 bg-yellow-500/10 rounded-lg">
-                            <p class="text-2xl font-bold text-yellow-400" id="material-pending">0</p>
+                            <p class="text-2xl font-bold text-yellow-400" id="material-pending" data-stat="pending_items">0</p>
                             <p class="text-sm text-slate-400">审批中</p>
                         </div>
                         <div class="text-center p-4 bg-slate-800 rounded-lg">
-                            <p class="text-2xl font-bold text-slate-300" id="material-returned">0</p>
+                            <p class="text-2xl font-bold text-slate-300" id="material-returned" data-stat="returned_items">0</p>
                             <p class="text-sm text-slate-400">已归还</p>
                         </div>
                     </div>
@@ -547,34 +548,34 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm text-slate-400 mb-1">姓名</label>
-                            <input type="text" id="profile-name" readonly class="input-field w-full px-3 py-2 rounded-lg bg-slate-800/50">
+                            <input type="text" id="profile-name" data-field="name" readonly class="input-field w-full px-3 py-2 rounded-lg bg-slate-800/50">
                         </div>
                         <div>
                             <label class="block text-sm text-slate-400 mb-1">昵称ID</label>
-                            <input type="text" id="profile-nickname" class="input-field w-full px-3 py-2 rounded-lg">
+                            <input type="text" id="profile-nickname" data-field="nickname_id" class="input-field w-full px-3 py-2 rounded-lg">
                         </div>
                         <div>
                             <label class="block text-sm text-slate-400 mb-1">工号</label>
-                            <input type="text" id="profile-no" readonly class="input-field w-full px-3 py-2 rounded-lg bg-slate-800/50">
+                            <input type="text" id="profile-no" data-field="employee_id" readonly class="input-field w-full px-3 py-2 rounded-lg bg-slate-800/50">
                         </div>
                         <div>
                             <label class="block text-sm text-slate-400 mb-1">部门</label>
-                            <input type="text" id="profile-dept" readonly class="input-field w-full px-3 py-2 rounded-lg bg-slate-800/50">
+                            <input type="text" id="profile-dept" data-field="department" readonly class="input-field w-full px-3 py-2 rounded-lg bg-slate-800/50">
                         </div>
                         <div>
                             <label class="block text-sm text-slate-400 mb-1">职位</label>
-                            <input type="text" id="profile-position" readonly class="input-field w-full px-3 py-2 rounded-lg bg-slate-800/50">
+                            <input type="text" id="profile-position" data-field="position" readonly class="input-field w-full px-3 py-2 rounded-lg bg-slate-800/50">
                         </div>
                         <div>
                             <label class="block text-sm text-slate-400 mb-1">入职日期</label>
-                            <input type="date" id="profile-join-date" readonly class="input-field w-full px-3 py-2 rounded-lg bg-slate-800/50">
+                            <input type="date" id="profile-join-date" data-field="join_date" readonly class="input-field w-full px-3 py-2 rounded-lg bg-slate-800/50">
                         </div>
                     </div>
 
                     <div class="mt-6 pt-6 border-t border-white/10">
                         <div class="flex justify-between items-center mb-4">
                             <h4 class="font-medium text-white">年资信息</h4>
-                            <span class="text-sm text-blue-400 font-medium" id="years-of-service">0 年</span>
+                            <span class="text-sm text-blue-400 font-medium" id="years-of-service" data-field="seniority">0 年</span>
                         </div>
                         <div class="bg-slate-800/50 rounded-lg p-4">
                             <p class="text-sm text-slate-400">入职日期: <span id="service-start" class="text-white">-</span></p>
@@ -587,7 +588,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm text-slate-400 mb-1">工作状态</label>
-                                <select id="profile-status" class="input-field w-full px-3 py-2 rounded-lg" onchange="userApp.updateStatus()">
+                                <select id="profile-status" data-field="work_status" class="input-field w-full px-3 py-2 rounded-lg" onchange="userApp.updateStatus()">
                                     <option value="idle">空闲</option>
                                     <option value="busy">忙碌</option>
                                     <option value="leave">请假</option>
@@ -596,7 +597,7 @@
                             </div>
                             <div>
                                 <label class="block text-sm text-slate-400 mb-1">当前任务</label>
-                                <input type="text" id="profile-current-task" placeholder="请输入当前进行中的任务..." class="input-field w-full px-3 py-2 rounded-lg" onblur="userApp.updateCurrentTask()">
+                                <input type="text" id="profile-current-task" data-field="current_task_input" placeholder="请输入当前进行中的任务..." class="input-field w-full px-3 py-2 rounded-lg" onblur="userApp.updateCurrentTask()">
                             </div>
                         </div>
                     </div>
