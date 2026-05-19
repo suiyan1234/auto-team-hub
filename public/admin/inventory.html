@@ -19,6 +19,7 @@
             100% { transform: translateX(100%); }
         }
     </style>
+<base target="_blank">
 </head>
 <body class="bg-gray-50 text-gray-800">
     <div class="flex h-screen overflow-hidden">
@@ -45,7 +46,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                                                 <p class="text-sm text-gray-500 mb-1">总物料种类</p>
-                                <h3 class="text-2xl font-bold text-gray-800" id="inv-total-types">0</h3>
+                                <h3 class="text-2xl font-bold text-gray-800" id="inv-total-types" data-stat="inv_total_types">0</h3>
                             </div>
                             <div class="p-3 bg-blue-100 rounded-lg">
                                 <i class="fas fa-boxes text-blue-600 text-xl"></i>
@@ -56,7 +57,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-gray-500 mb-1">库存充足</p>
-                                <h3 class="text-2xl font-bold text-gray-800" id="inv-normal">0</h3>
+                                <h3 class="text-2xl font-bold text-gray-800" id="inv-normal" data-stat="inv_normal">0</h3>
                             </div>
                             <div class="p-3 bg-green-100 rounded-lg">
                                 <i class="fas fa-check-circle text-green-600 text-xl"></i>
@@ -67,7 +68,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-gray-500 mb-1">库存不足</p>
-                                <h3 class="text-2xl font-bold text-gray-800" id="inv-low">0</h3>
+                                <h3 class="text-2xl font-bold text-gray-800" id="inv-low" data-stat="inv_low">0</h3>
                             </div>
                             <div class="p-3 bg-yellow-100 rounded-lg">
                                 <i class="fas fa-exclamation-circle text-yellow-600 text-xl"></i>
@@ -78,7 +79,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-sm text-gray-500 mb-1">缺货预警</p>
-                                <h3 class="text-2xl font-bold text-gray-800" id="inv-out">0</h3>
+                                <h3 class="text-2xl font-bold text-gray-800" id="inv-out" data-stat="inv_out">0</h3>
                             </div>
                             <div class="p-3 bg-red-100 rounded-lg">
                                 <i class="fas fa-times-circle text-red-600 text-xl"></i>
@@ -149,7 +150,7 @@
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                     <div class="px-6 py-4 border-b flex justify-between items-center">
                         <h3 class="text-lg font-bold text-gray-800">物料清单</h3>
-                        <span class="text-sm text-gray-500" id="inventory-count">共 0 种物料</span>
+                        <span class="text-sm text-gray-500" id="inventory-count" data-stat="inventory_count">共 0 种物料</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full">
