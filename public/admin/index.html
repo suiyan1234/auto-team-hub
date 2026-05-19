@@ -175,6 +175,7 @@
             color: white;
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <!-- Permission Denied Screen (shown to non-admin users) -->
@@ -266,7 +267,7 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-sm text-slate-400 mb-1">总员工数</p>
-                                    <h3 class="text-3xl font-bold text-white" id="total-employees">0</h3>
+                                    <h3 class="text-3xl font-bold text-white" id="total-employees" data-stat="total_users">0</h3>
                                     <p class="text-xs text-green-400 mt-1"><i class="fas fa-arrow-up"></i> 较上月 +3</p>
                                 </div>
                                 <div class="p-3 bg-blue-500/20 rounded-lg">
@@ -279,7 +280,7 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-sm text-slate-400 mb-1">本月总加班</p>
-                                    <h3 class="text-3xl font-bold text-white" id="total-overtime">0h</h3>
+                                    <h3 class="text-3xl font-bold text-white" id="total-overtime" data-stat="month_overtime_total">0h</h3>
                                     <p class="text-xs text-orange-400 mt-1" id="ot-trend">同比 +12%</p>
                                 </div>
                                 <div class="p-3 bg-green-500/20 rounded-lg">
@@ -292,7 +293,7 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-sm text-slate-400 mb-1">任务完成率</p>
-                                    <h3 class="text-3xl font-bold text-white" id="task-completion">0%</h3>
+                                    <h3 class="text-3xl font-bold text-white" id="task-completion" data-stat="task_completion_rate">0%</h3>
                                     <p class="text-xs text-slate-400 mt-1">本月目标: 85%</p>
                                 </div>
                                 <div class="p-3 bg-purple-500/20 rounded-lg">
@@ -305,7 +306,7 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-sm text-slate-400 mb-1">自动化覆盖率</p>
-                                    <h3 class="text-3xl font-bold text-white" id="auto-coverage">0%</h3>
+                                    <h3 class="text-3xl font-bold text-white" id="auto-coverage" data-stat="automation_rate">0%</h3>
                                     <p class="text-xs text-green-400 mt-1">运行良好</p>
                                 </div>
                                 <div class="p-3 bg-pink-500/20 rounded-lg">
@@ -346,7 +347,7 @@
                             <h3 class="text-lg font-bold text-white">
                                 <i class="fas fa-exclamation-triangle text-orange-400 mr-2"></i>预警中心
                             </h3>
-                            <span class="text-sm text-slate-400" id="alert-count">0 个预警</span>
+                            <span class="text-sm text-slate-400" id="alert-count" data-stat="warnings">0 个预警</span>
                         </div>
                         <div id="alert-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <!-- Dynamic alerts -->
@@ -362,7 +363,7 @@
                                 <div id="online-users" class="flex -space-x-2 overflow-hidden mb-2">
                                     <!-- Dynamic avatars -->
                                 </div>
-                                <p class="text-sm text-slate-400" id="online-count">0 人在线</p>
+                                <p class="text-sm text-slate-400" id="online-count" data-stat="online_users">0 人在线</p>
                             </div>
                             
                             <div class="bg-slate-800/50 rounded-lg p-4">
@@ -509,19 +510,19 @@
                         <!-- Project Stats -->
                         <div class="grid grid-cols-4 gap-4 mb-6">
                             <div class="text-center p-4 bg-blue-500/10 rounded-lg">
-                                <p class="text-2xl font-bold text-blue-400" id="admin-total-projects">0</p>
+                                <p class="text-2xl font-bold text-blue-400" id="admin-total-projects" data-stat="total_projects">0</p>
                                 <p class="text-sm text-slate-400">总项目数</p>
                             </div>
                             <div class="text-center p-4 bg-purple-500/10 rounded-lg">
-                                <p class="text-2xl font-bold text-purple-400" id="admin-total-cases">0</p>
+                                <p class="text-2xl font-bold text-purple-400" id="admin-total-cases" data-stat="total_cases">0</p>
                                 <p class="text-sm text-slate-400">总Case数</p>
                             </div>
                             <div class="text-center p-4 bg-green-500/10 rounded-lg">
-                                <p class="text-2xl font-bold text-green-400" id="admin-completion-rate">0%</p>
+                                <p class="text-2xl font-bold text-green-400" id="admin-completion-rate" data-stat="project_completion">0%</p>
                                 <p class="text-sm text-slate-400">完成率</p>
                             </div>
                             <div class="text-center p-4 bg-pink-500/10 rounded-lg">
-                                <p class="text-2xl font-bold text-pink-400" id="admin-auto-rate">0%</p>
+                                <p class="text-2xl font-bold text-pink-400" id="admin-auto-rate" data-stat="project_automation">0%</p>
                                 <p class="text-sm text-slate-400">自动化率</p>
                             </div>
                         </div>
@@ -584,19 +585,19 @@
                         <!-- Material Stats -->
                         <div class="grid grid-cols-4 gap-4 mb-6">
                             <div class="text-center p-4 bg-green-500/10 rounded-lg">
-                                <p class="text-2xl font-bold text-green-400" id="material-in">0</p>
+                                <p class="text-2xl font-bold text-green-400" id="material-in" data-stat="in_stock">0</p>
                                 <p class="text-sm text-slate-400">在库</p>
                             </div>
                             <div class="text-center p-4 bg-blue-500/10 rounded-lg">
-                                <p class="text-2xl font-bold text-blue-400" id="material-out">0</p>
+                                <p class="text-2xl font-bold text-blue-400" id="material-out" data-stat="borrowed_items">0</p>
                                 <p class="text-sm text-slate-400">借出</p>
                             </div>
                             <div class="text-center p-4 bg-yellow-500/10 rounded-lg">
-                                <p class="text-2xl font-bold text-yellow-400" id="material-pending-approval">0</p>
+                                <p class="text-2xl font-bold text-yellow-400" id="material-pending-approval" data-stat="pending_borrowings">0</p>
                                 <p class="text-sm text-slate-400">待审批</p>
                             </div>
                             <div class="text-center p-4 bg-red-500/10 rounded-lg">
-                                <p class="text-2xl font-bold text-red-400" id="material-maintenance">0</p>
+                                <p class="text-2xl font-bold text-red-400" id="material-maintenance" data-stat="maintenance_items">0</p>
                                 <p class="text-sm text-slate-400">维护中</p>
                             </div>
                         </div>
