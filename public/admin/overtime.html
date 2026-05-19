@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="../shared/css/main.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<base target="_blank">
 </head>
 <body class="bg-gray-50 text-gray-800">
     <div class="flex h-screen overflow-hidden">
@@ -55,7 +56,7 @@
                         <h3 class="text-lg font-bold text-gray-800">
                             <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>加班预警名单
                         </h3>
-                        <span class="text-sm text-gray-500" id="warning-count">0 人超标</span>
+                        <span class="text-sm text-gray-500" id="warning-count" data-stat="warning_count">0 人超标</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full">
